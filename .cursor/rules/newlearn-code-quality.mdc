@@ -1,0 +1,13 @@
+---
+description: NewLearn TypeScript and Tailwind code quality standards
+globs: "**/*.{ts,tsx,css}"
+alwaysApply: false
+---
+
+# Code Quality
+
+- Fully typed TypeScript; prefer small, modular, documented components.
+- Tailwind only with approved tokens: cream backgrounds, lavender primary, amber accents, soft shadows, `rounded-2xl`.
+- Prefer semantic utility groups over one-off hex sprawl; centralize tokens in theme/CSS variables when adding new surfaces.
+- No curriculum strings or lesson IDs hardcoded in components — import from JSON / typed content modules.
+- Keep interaction engines pure: props in → UI + callbacks out; side effects (audio, persistence) via hooks/adapters.

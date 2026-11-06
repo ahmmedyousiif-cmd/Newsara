@@ -1,0 +1,25 @@
+---
+description: NewLearn typography, color tokens, depth, and micro-interactions
+alwaysApply: true
+---
+
+# Design System
+
+## Typography (Google Fonts)
+- Arabic: `Cairo` or `Tajawal` (RTL headings + body).
+- English: `Inter` or `Plus Jakarta Sans` (linguistic / technical UI).
+- Use `dir="rtl"` on Arabic wrappers; `dir="ltr"` on English sentences/snippets.
+
+## Color & Depth
+- Backgrounds: `#FDFBF7`, `#F9F6EE` (soft cream).
+- Primary: `#7C3AED`, `#8B5CF6` (lavender actions / active states).
+- Accents: `#D97706`, `#F59E0B` (badges, rewards, gentle error warmth).
+- Depth: `shadow-sm` / `shadow-md` / `shadow-xl`, `backdrop-blur-md`, `rounded-2xl`, soft inner borders — floating cards, recessed insets.
+
+## Feedback & Motion
+- Animations: 200–300ms, ease-out (Tailwind / Framer Motion). No harsh jumps.
+- Success: soft scale/glow, green/lavender banner, checkmark or light confetti.
+- Error: micro-shake, soft amber/coral pulse, encouraging hints (never punitive).
+- Press: `active:scale-95` with shadow compression.
+- Sound hooks: Web Audio API / Tone.js structure ready — melodic pop (correct), soft thud (error), chime (lesson complete). No generic jarring stock sounds.
+- Touch targets: min 48×48px.

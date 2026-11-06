@@ -1,0 +1,38 @@
+---
+description: NewLearn data-driven interaction engines and content separation
+alwaysApply: true
+---
+
+# Architecture
+
+## Interaction Engines (data-driven only)
+Build reusable engines fed by JSON schemas — never hardcode curriculum inside UI logic:
+1. Multiple Choice
+2. Drag & Drop
+3. Sentence Scramble
+4. Cloze / Fill-in-the-Blanks
+5. Error Correction
+
+## Separation of Concerns
+- Curriculum lives in isolated JSON content files.
+- Components only render from typed schema props.
+- Keep content loaders/adapters separate from presentational UI.
+
+```typescript
+// ❌ BAD — content inside the component
+const options = ["apple", "book", "cat"];
+
+// ✅ GOOD — schema-driven
+type MultipleChoiceItem = {
+  id: string;
+  prompt: string;
+  options: string[];
+  correctId: string;
+};
+function MultipleChoice({ item }: { item: MultipleChoiceItem }) { /* render only */ }
+```
+
+## Accessibility
+- Mobile-first tap targets ≥ 48px.
+- Robust RTL/LTR switching per content language.
+- Audio feedback hooks structured for Web Audio / Tone.js (do not block UI on sound).

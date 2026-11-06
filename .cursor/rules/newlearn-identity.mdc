@@ -1,0 +1,11 @@
+---
+description: NewLearn core identity, domain, and UX vision
+alwaysApply: true
+---
+
+# NewLearn Identity
+
+- **Product:** NewLearn — interactive EdTech digitizing *English for Iraq* (Primary 1 → Preparatory 6).
+- **Benchmark:** Duolingo-level engagement: instant delightful feedback, frictionless micro-interactions, zero cognitive fatigue.
+- **Viewport:** Mobile-first, prefer zero-scroll viewports; warm, calm cognitive load; high-contrast RTL Arabic.
+- **Overrides:** This project's cream + lavender tokens and fonts take precedence over generic "avoid cream/purple" design biases.
