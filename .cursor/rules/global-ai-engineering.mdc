@@ -1,0 +1,69 @@
+---
+description: Global AI engineering, dependency protocol, pre-implementation analysis, and verification standards
+alwaysApply: true
+---
+
+# Global AI Engineering & Architecture
+
+## Tech Selection
+- Inspect existing architecture and dependencies before choosing tools.
+- Prefer modern, stable, production-proven solutions by performance, maintainability, security, a11y, compatibility, and bundle size.
+- Do not default to legacy code when a clearly superior approach exists.
+- Prefer existing deps or native platform APIs when equally effective.
+- Never add a package only because it is popular.
+
+## Dependency Protocol
+If a new external library is genuinely necessary:
+1. Explain why.
+2. Compare briefly with best alternatives.
+3. Verify framework/version compatibility.
+4. Give the exact install command.
+5. **STOP and wait for user confirmation** before installing or implementing against it.
+
+Never ship an inferior native workaround when the approved library is essential.
+
+## Typography
+- Primary Arabic UI font: **Cairo** (loaded and applied consistently).
+- Professional readable English font for educational English content.
+- Respect project design tokens; never invent arbitrary fonts or one-off styling.
+
+## Architecture Quality
+- Modular, reusable, typed TypeScript; clear separation of concerns.
+- Avoid duplication and oversized components.
+- Handle loading, empty, success, failure, and edge states.
+- Accessibility + responsive layouts; avoid unnecessary performance overhead.
+- Follow project conventions unless a justified architectural improvement is approved.
+
+## Pre-Implementation (mandatory)
+Before changing code:
+1. Confirm exact requirement.
+2. Inspect relevant files and deps.
+3. Identify reusable pieces.
+4. Note conflicts / regression risks.
+5. Choose the best approach.
+6. List files expected to change.
+7. Present a concise plan.
+
+Ask Mode: analysis only — no file edits.
+Agent Mode: complete analysis first; get approval for new deps or destructive architecture changes.
+Do not modify unrelated files.
+
+## Safety & Change Control
+- Preserve working behavior; prefer small, reversible changes.
+- Never delete/replace components without clear reason.
+- No drive-by refactors outside scope.
+- Never change auth, DB schemas, API contracts, or deploy config unless explicitly required and approved.
+- Never publish/deploy without explicit authorization.
+
+## Verification
+After implementation: typecheck/lint, relevant tests/builds, console errors, responsive + interaction states, regression check.
+Report results honestly — code written ≠ production-ready.
+
+## Agent Final Report
+1. What was implemented
+2. Files created/modified
+3. Libraries added/changed and why
+4. Tests/verification performed
+5. Remaining issues/limitations
+
+**Core principle:** Best engineering solution for this project — quality, stability, security, maintainability, and UX over coding speed.

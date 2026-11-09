@@ -1,0 +1,21 @@
+{
+  "id": "vocab-translate-ar-en",
+  "engine": "translate-word",
+  "instruction": "ترجم هذه الكلمة",
+  "items": [
+    {
+      "id": "tr-1",
+      "mode": "word-bank",
+      "promptAr": "حليب",
+      "answerWords": ["milk"],
+      "bank": ["milk", "tea", "water"]
+    },
+    {
+      "id": "tr-2",
+      "mode": "word-bank",
+      "promptAr": "ماء",
+      "answerWords": ["water"],
+      "bank": ["water", "coffee", "milk"]
+    }
+  ]
+}

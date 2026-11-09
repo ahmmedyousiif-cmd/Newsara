@@ -1,26 +1,211 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff8ef;
+  --foreground: #3d2c1e;
+  --cream: #fff8ef;
+  --cream-soft: #fef3e2;
+  --apricot: #f0a05a;
+  --apricot-deep: #e8893a;
+  --amber: #e4a11b;
+  --amber-bright: #f5c542;
+  --success: #3d9a6a;
+  --error: #e07a5f;
+  --card: #fffdf8;
+  --card-border: #edd9bc;
+  --muted: #64748b;
+  --progress-track: #edd9bc;
+  --app-font-scale: 1;
+}
+
+.dark {
+  --background: #131f24;
+  --foreground: #f1f5f9;
+  --cream: #131f24;
+  --cream-soft: #131f24;
+  --apricot: #f0a05a;
+  --apricot-deep: #e8893a;
+  --amber: #e4a11b;
+  --amber-bright: #f5c542;
+  --success: #58cc02;
+  --error: #ff4b4b;
+  --card: #1f2e35;
+  --card-border: #37464f;
+  --muted: #94a3b8;
+  --progress-track: #2e3e46;
+}
+
+@font-face {
+  font-family: "DIN Round Pro";
+  src:
+    local("DIN Round Pro"),
+    local("DINRoundPro"),
+    url("/fonts/DINRoundPro.woff2") format("woff2"),
+    url("/fonts/DINRoundPro.woff") format("woff");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DINPro-Rounded";
+  src:
+    local("DINPro-Rounded"),
+    local("DIN Pro Rounded"),
+    url("/fonts/DINPro-Rounded.woff2") format("woff2"),
+    url("/fonts/DINPro-Rounded.woff") format("woff");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-apricot: var(--apricot);
+  --color-apricot-deep: var(--apricot-deep);
+  --color-amber: var(--amber);
+  --color-amber-bright: var(--amber-bright);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted);
+  --color-progress-track: var(--progress-track);
+  --color-dark-slate: #131f24;
+  --font-sans:
+    var(--font-cairo-family), "DIN Round Pro", "DINPro-Rounded", sans-serif;
+  --font-cairo:
+    var(--font-cairo-family), "DIN Round Pro", "DINPro-Rounded", sans-serif;
+  --font-nl:
+    var(--font-cairo-family), "DIN Round Pro", "DINPro-Rounded", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes match-jump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes match-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-cairo-family), "DIN Round Pro", "DINPro-Rounded",
+    sans-serif;
+  font-size: calc(1.125rem * var(--app-font-scale, 1));
 }
+
+.animate-shake {
+  animation: shake 0.35s ease-out;
+}
+
+.animate-match-jump {
+  animation: match-jump 0.32s ease-out;
+}
+
+.animate-match-fade {
+  animation: match-fade-out 0.35s ease-out forwards;
+  pointer-events: none;
+}
+
+.animate-slide-up {
+  animation: slide-up 280ms ease-out;
+}
+
+@keyframes set-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-set-enter {
+  animation: set-enter 320ms ease-out;
+}
+
+/* Horizontal full-group slide (left → right continuous strip) */
+.groups-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+.group-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform, opacity;
+  transition:
+    transform 1.1s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 1.1s ease;
+}
+
+.group-enter-left {
+  transform: translateX(-100vw);
+  opacity: 0;
+}
+
+.group-active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.group-exit-right {
+  transform: translateX(100vw);
+  opacity: 0;
+  pointer-events: none;
+}
+

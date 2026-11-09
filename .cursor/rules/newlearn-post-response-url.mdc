@@ -1,0 +1,20 @@
+---
+description: After every agent reply, always share the updated local app URL
+alwaysApply: true
+---
+
+# Post-Response App Link
+
+After finishing **every** Agent-mode request (UI change, fix, feature, or config), end the reply with the current local entry URL the user can open.
+
+## Rules
+- Always include a clickable absolute URL (e.g. `http://localhost:3000/`).
+- Prefer the **most relevant route** for what just changed (home, lesson, settings, etc.).
+- If the route is unknown, default to the app home URL.
+- Read the active `npm run dev` terminal when needed to confirm host/port; do not invent a dead port.
+- Keep this as a short final line — do not bury it mid-answer.
+
+## Example endings
+- `افتح: http://localhost:3000/`
+- `افتح التمرين: http://localhost:3000/lesson/1`
+- `افتح الإعدادات: http://localhost:3000/settings`

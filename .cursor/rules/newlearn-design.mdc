@@ -11,15 +11,16 @@ alwaysApply: true
 - Use `dir="rtl"` on Arabic wrappers; `dir="ltr"` on English sentences/snippets.
 
 ## Color & Depth
-- Backgrounds: `#FDFBF7`, `#F9F6EE` (soft cream).
-- Primary: `#7C3AED`, `#8B5CF6` (lavender actions / active states).
-- Accents: `#D97706`, `#F59E0B` (badges, rewards, gentle error warmth).
-- Depth: `shadow-sm` / `shadow-md` / `shadow-xl`, `backdrop-blur-md`, `rounded-2xl`, soft inner borders — floating cards, recessed insets.
+- Backgrounds: cream / apricot warmth (`#FFF8EF`, `#FEF3E2`).
+- Primary: apricot / soft gold (`#F0A05A`, `#E8893A`) — **no purple/lavender**.
+- Accents: amber (`#E4A11B`, `#F5C542`) for highlights.
+- Success / error: calm green `#3D9A6A`, soft coral `#E07A5F`.
+- Depth: `shadow-sm` / `shadow-md`, `rounded-2xl`, soft borders (`#EDD9BC`).
 
 ## Feedback & Motion
-- Animations: 200–300ms, ease-out (Tailwind / Framer Motion). No harsh jumps.
-- Success: soft scale/glow, green/lavender banner, checkmark or light confetti.
-- Error: micro-shake, soft amber/coral pulse, encouraging hints (never punitive).
-- Press: `active:scale-95` with shadow compression.
-- Sound hooks: Web Audio API / Tone.js structure ready — melodic pop (correct), soft thud (error), chime (lesson complete). No generic jarring stock sounds.
+- Animations: 200–300ms, ease-out. No harsh jumps.
+- Success: soft scale, green confirmation.
+- Error: micro-shake, soft coral pulse, encouraging tone.
+- Press: `active:scale-95` with border/shadow compression.
+- Sound hooks: Web Audio soft tones (tap / correct / error / complete).
 - Touch targets: min 48×48px.

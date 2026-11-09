@@ -1,0 +1,33 @@
+{
+  "id": "vocab-matching-easy",
+  "engine": "matching-pairs",
+  "title": "أهم المفردات",
+  "titleEn": "Key Vocabulary",
+  "instruction": "أهم المفردات",
+  "sets": [
+    {
+      "id": "set-1-drinks",
+      "title": "مشروبات يومية",
+      "titleEn": "Daily Drinks",
+      "pairs": [
+        { "pairId": "p1", "en": "coffee", "ar": "قهوة" },
+        { "pairId": "p2", "en": "tea", "ar": "شاي" },
+        { "pairId": "p3", "en": "milk", "ar": "حليب" },
+        { "pairId": "p4", "en": "sugar", "ar": "سكر" },
+        { "pairId": "p5", "en": "water", "ar": "ماء" }
+      ]
+    },
+    {
+      "id": "set-2-school",
+      "title": "كلمات سهلة",
+      "titleEn": "Easy Words",
+      "pairs": [
+        { "pairId": "s1", "en": "book", "ar": "كتاب" },
+        { "pairId": "s2", "en": "pen", "ar": "قلم" },
+        { "pairId": "s3", "en": "school", "ar": "مدرسة" },
+        { "pairId": "s4", "en": "door", "ar": "باب" },
+        { "pairId": "s5", "en": "apple", "ar": "تفاحة" }
+      ]
+    }
+  ]
+}

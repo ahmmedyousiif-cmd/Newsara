@@ -1,0 +1,38 @@
+---
+description: Simple Git save/rollback checkpoints for non-programmers; required at end of every reply
+alwaysApply: true
+---
+
+# Git Checkpoints (نقاط الحفظ)
+
+The user is not a programmer. Keep Git instructions extremely simple. Never run destructive git commands unless explicitly asked.
+
+## End every reply with this section
+Always append a copy-paste ready block at the **very end** of the response (whole repo):
+
+```markdown
+---
+### 📌 Project Checkpoints
+- **To Save All Changes (للحفظ):**
+  ```bash
+  git add .
+  git commit -m "نقطة حفظ: وصف قصير للتغيير"
+  ```
+
+- **To Rollback (للرجوع لآخر نقطة حفظ):**
+  ```bash
+  git reset --hard HEAD
+  git clean -fd
+  ```
+```
+
+## Simple meanings (explain in Arabic when asked)
+- **حفظ** = `git add .` ثم `git commit -m "..."` → يحفظ الوضع الحالي.
+- **رجوع** = `git reset --hard HEAD` ثم `git clean -fd` → يرجع لآخر حفظ ويمسح التعديلات غير المحفوظة.
+
+## Safety
+- Do **not** commit unless the user explicitly asks to save/commit.
+- Do **not** run rollback unless the user explicitly asks to undo/rollback.
+- Prefer PowerShell-friendly separate lines on Windows when needed.
+- After a successful checkpoint commit, if the user wants to undo that commit specifically, offer:
+  `git reset --hard HEAD~1`

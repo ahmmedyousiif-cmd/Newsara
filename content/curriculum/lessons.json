@@ -1,0 +1,46 @@
+{
+  "stageTitle": "الأول المتوسط",
+  "unitTitle": "Unit 1",
+  "lessons": [
+    {
+      "id": "lesson-1",
+      "number": 1,
+      "title": "Lesson 1",
+      "titleAr": "أهم المفردات",
+      "unlocked": true,
+      "href": "/lesson/1"
+    },
+    {
+      "id": "lesson-2",
+      "number": 2,
+      "title": "Lesson 2",
+      "titleAr": "قريبًا",
+      "unlocked": false,
+      "href": null
+    },
+    {
+      "id": "lesson-3",
+      "number": 3,
+      "title": "Lesson 3",
+      "titleAr": "قريبًا",
+      "unlocked": false,
+      "href": null
+    },
+    {
+      "id": "lesson-4",
+      "number": 4,
+      "title": "Lesson 4",
+      "titleAr": "قريبًا",
+      "unlocked": false,
+      "href": null
+    },
+    {
+      "id": "lesson-5",
+      "number": 5,
+      "title": "Lesson 5",
+      "titleAr": "قريبًا",
+      "unlocked": false,
+      "href": null
+    }
+  ]
+}
