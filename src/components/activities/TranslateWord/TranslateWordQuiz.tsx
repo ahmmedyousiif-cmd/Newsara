@@ -48,6 +48,9 @@ export function TranslateWordQuiz({
     item.mode === "word-bank" ? shuffleCards(buildBank(item)) : [],
   );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [verticalSelectedId, setVerticalSelectedId] = useState<string | null>(
+    null,
+  );
   /** Brief flash id for instant press confirmation on bank chips. */
   const [pressFlashId, setPressFlashId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +69,7 @@ export function TranslateWordQuiz({
     setInteractionState("IDLE");
     setTyped("");
     setSelectedIds([]);
+    setVerticalSelectedId(null);
     setPressFlashId(null);
     if (flashTimerRef.current) window.clearTimeout(flashTimerRef.current);
     if (item.mode === "word-bank") {
@@ -92,14 +96,26 @@ export function TranslateWordQuiz({
       .filter((w): w is BankWord => Boolean(w));
   }, [item.mode, selectedIds, bankOrder]);
 
+  const verticalOptions = useMemo(() => {
+    if (item.mode !== "vertical-choice") return [];
+    return shuffleCards([...item.options]);
+  }, [item]);
+
   const canCheck =
     !locked &&
     (item.mode === "text-input"
       ? typed.trim().length > 0
-      : selectedIds.length > 0);
+      : item.mode === "vertical-choice"
+        ? verticalSelectedId !== null
+        : selectedIds.length > 0);
 
   const correctDisplay =
-    item.mode === "text-input" ? item.answer : item.answerWords.join(" ");
+    item.mode === "text-input"
+      ? item.answer
+      : item.mode === "vertical-choice"
+        ? (item.options.find((o) => o.id === item.correctId)?.text ??
+          item.correctId)
+        : item.answerWords.join(" ");
 
   const flashPress = (id: string) => {
     setPressFlashId(id);
@@ -112,7 +128,6 @@ export function TranslateWordQuiz({
 
   const handleSelectBankWord = (word: BankWord) => {
     if (locked) return;
-    // Single-choice only: replace any existing selection.
     if (selectedIds[0] === word.id) return;
     playCorrectClick();
     flashPress(word.id);
@@ -123,8 +138,14 @@ export function TranslateWordQuiz({
     if (locked) return;
     playCorrectClick();
     flashPress(word.id);
-    // Return chip to its bank slot.
     setSelectedIds((prev) => prev.filter((id) => id !== word.id));
+  };
+
+  const handleSelectVertical = (optionId: string) => {
+    if (locked) return;
+    playCorrectClick();
+    // Tap again to clear; otherwise replace selection (single choice).
+    setVerticalSelectedId((prev) => (prev === optionId ? null : optionId));
   };
 
   const handleCheck = () => {
@@ -140,6 +161,9 @@ export function TranslateWordQuiz({
       );
       next =
         grade === "correct" ? "SUCCESS" : grade === "typo" ? "TYPO" : "ERROR";
+    } else if (item.mode === "vertical-choice") {
+      next =
+        verticalSelectedId === item.correctId ? "SUCCESS" : "ERROR";
     } else {
       const chosen = selectedWords.map((w) => normalizeAnswer(w.text));
       const expected = item.answerWords.map(normalizeAnswer);
@@ -221,7 +245,13 @@ export function TranslateWordQuiz({
         </h2>
 
         <LayoutGroup id={`quiz-${item.id}`}>
-          <div className="flex min-h-[38vh] flex-1 flex-col items-center justify-center gap-6">
+          <div
+            className={`flex min-h-[28vh] flex-1 flex-col items-center gap-6 ${
+              item.mode === "vertical-choice"
+                ? "justify-start pt-2"
+                : "justify-center"
+            }`}
+          >
             <p
               dir="rtl"
               className="text-center text-4xl font-extrabold text-black dark:text-white sm:text-5xl"
@@ -275,7 +305,9 @@ export function TranslateWordQuiz({
                   </button>
                 ) : null}
               </div>
-            ) : (
+            ) : null}
+
+            {item.mode === "word-bank" ? (
               <div
                 dir="ltr"
                 aria-hidden={selectedWords.length === 0}
@@ -294,7 +326,37 @@ export function TranslateWordQuiz({
                   />
                 ))}
               </div>
-            )}
+            ) : null}
+
+            {item.mode === "vertical-choice" ? (
+              <div
+                dir="ltr"
+                className="flex w-full max-w-sm flex-col gap-3 pt-2"
+                role="listbox"
+                aria-label="خيارات الإجابة"
+              >
+                {verticalOptions.map((opt) => {
+                  const selected = verticalSelectedId === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      disabled={locked}
+                      onClick={() => handleSelectVertical(opt.id)}
+                      className={`flex min-h-14 w-full touch-manipulation select-none items-center justify-center rounded-2xl border-2 border-b-4 px-4 text-lg font-extrabold transition-[transform,background-color,border-color,box-shadow,opacity] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed ${
+                        selected
+                          ? "border-[#1CB0F6] bg-[#DDF4FF] text-black shadow-[0_0_0_2px_rgba(28,176,246,0.28)] dark:border-[#1CB0F6] dark:bg-[#1A3A4A] dark:text-white"
+                          : "border-card-border bg-card text-black hover:border-apricot/60 dark:text-white dark:hover:bg-[#25373F]"
+                      }`}
+                    >
+                      {opt.text}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
 
           {item.mode === "word-bank" ? (

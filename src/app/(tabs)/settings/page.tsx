@@ -58,11 +58,12 @@ export default function SettingsPage() {
               key={option.id}
               type="button"
               onClick={() => setFontScale(option.id)}
-              className={`flex min-h-12 items-center rounded-2xl border-2 px-4 py-3 text-sm font-bold transition-all active:scale-[0.98] ${
+              className={`flex min-h-12 items-center rounded-2xl border-2 px-4 py-3 font-bold transition-all active:scale-[0.98] ${
                 fontScale === option.id
                   ? "border-apricot bg-apricot/15 text-apricot-deep dark:text-apricot"
                   : "border-card-border text-slate-700 dark:text-slate-200"
               }`}
+              style={{ fontSize: `${Math.round(14 * option.scale)}px` }}
             >
               <span>{option.label}</span>
             </button>

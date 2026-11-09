@@ -18,7 +18,24 @@ export type TranslateWordBankItem = {
   bank: string[];
 };
 
-export type TranslateItem = TranslateTextItem | TranslateWordBankItem;
+export type TranslateVerticalOption = {
+  id: string;
+  text: string;
+};
+
+/** Single-select MCQ with vertical option buttons. */
+export type TranslateVerticalChoiceItem = {
+  id: string;
+  mode: "vertical-choice";
+  promptAr: string;
+  options: TranslateVerticalOption[];
+  correctId: string;
+};
+
+export type TranslateItem =
+  | TranslateTextItem
+  | TranslateWordBankItem
+  | TranslateVerticalChoiceItem;
 
 export type TranslateActivity = {
   id: string;

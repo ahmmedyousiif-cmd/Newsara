@@ -132,12 +132,17 @@
   }
 }
 
+/* Scale rem-based Tailwind text (text-sm, text-xl, …) from preferences. */
+html {
+  font-size: calc(16px * var(--app-font-scale, 1));
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-cairo-family), "DIN Round Pro", "DINPro-Rounded",
     sans-serif;
-  font-size: calc(1.125rem * var(--app-font-scale, 1));
+  font-size: 1.125rem;
 }
 
 .animate-shake {

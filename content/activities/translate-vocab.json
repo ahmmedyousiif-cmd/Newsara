@@ -16,6 +16,28 @@
       "promptAr": "ماء",
       "answerWords": ["water"],
       "bank": ["water", "coffee", "milk"]
+    },
+    {
+      "id": "tr-3",
+      "mode": "vertical-choice",
+      "promptAr": "قهوة",
+      "correctId": "coffee",
+      "options": [
+        { "id": "coffee", "text": "coffee" },
+        { "id": "tea", "text": "tea" },
+        { "id": "milk", "text": "milk" }
+      ]
+    },
+    {
+      "id": "tr-4",
+      "mode": "vertical-choice",
+      "promptAr": "سكر",
+      "correctId": "sugar",
+      "options": [
+        { "id": "water", "text": "water" },
+        { "id": "sugar", "text": "sugar" },
+        { "id": "book", "text": "book" }
+      ]
     }
   ]
 }

@@ -1,0 +1,18 @@
+---
+description: Explain all work in simple Arabic for non-programmers; no jargon
+alwaysApply: true
+---
+
+# Simple Explanation for Non-Programmers
+
+The user is not a programmer and does not know technical or engineering terminology.
+
+## Every response must
+1. **Simple Explanation First (Arabic):** After describing code or changes, explain in very plain Arabic: what you did, why you did it, and what problem it solves.
+2. **No Jargon:** Avoid heavy technical slang. If a technical term is necessary, explain it in one simple sentence.
+3. **Analogy / Clarity:** Write as if explaining to a smart friend who knows nothing about coding — clear, friendly, practical.
+
+## Style
+- Prefer short sentences and everyday words.
+- Lead with the outcome the user will see on screen, then briefly how it was done.
+- Do not dump long engineering essays unless the user asks for deep detail.
