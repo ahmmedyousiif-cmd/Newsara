@@ -164,16 +164,13 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
-/* Tabs + lesson roadmap — smooth momentum scroll (cream/apricot palette unchanged) */
+/* Native vertical scroll for tabs (title can stick above journey) */
 .tabs-main-scroll {
+  overflow-x: hidden;
   overflow-y: auto;
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-}
-
-.lesson-roadmap-scroll {
-  padding-bottom: 0.5rem;
+  touch-action: pan-y;
 }
 
 .learning-journey-viewport {

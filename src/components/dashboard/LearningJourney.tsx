@@ -58,12 +58,12 @@ export function LearningJourney({ stations }: LearningJourneyProps) {
 
   return (
     <div
-      className="learning-journey-viewport relative w-full overflow-x-hidden"
+      className="learning-journey-viewport relative w-full overflow-x-hidden pb-6"
       dir="ltr"
     >
       <div
         className="relative mx-auto w-full max-w-md"
-        style={{ height }}
+        style={{ height: `${height}px`, minHeight: `${height}px` }}
       >
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full"
