@@ -76,6 +76,7 @@ export function MatchingPairsContainer({
   const handleCardClick = (item: MatchCard) => {
     if (interactionLocked) return;
 
+    // Speak English word on tap (ElevenLabs if key exists, else browser voice).
     if (item.type === "en") {
       void PremiumTTSManager.playWord(item.text);
     }

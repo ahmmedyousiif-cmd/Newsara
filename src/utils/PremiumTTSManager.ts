@@ -3,6 +3,15 @@ const CACHE_KEY_PREFIX = "en:";
 /** ElevenLabs deep-male voice: Adam */
 const FALLBACK_VOICE_HINT = "Adam";
 
+const PREFERRED_BROWSER_VOICES = [
+  "Google US English",
+  "Samantha",
+  "Alex",
+  "Microsoft Aria Online (Natural) - English (United States)",
+  "Microsoft Zira - English (United States)",
+  "Google UK English Female",
+] as const;
+
 type PlayOptions = {
   /** Extra gain multiplier after LowShelf (default 1.35). */
   gain?: number;
@@ -14,6 +23,8 @@ class PremiumTTSManagerImpl {
   private currentSource: AudioBufferSourceNode | null = null;
   private inflight = new Map<string, Promise<AudioBuffer>>();
   private playGeneration = 0;
+  private browserVoices: SpeechSynthesisVoice[] = [];
+  private voicesHooked = false;
 
   private getContext(): AudioContext {
     if (!this.audioCtx) {
@@ -24,6 +35,43 @@ class PremiumTTSManagerImpl {
       this.audioCtx = new AC();
     }
     return this.audioCtx;
+  }
+
+  private ensureBrowserVoices(): void {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const load = () => {
+      this.browserVoices = window.speechSynthesis.getVoices();
+    };
+    load();
+    if (!this.voicesHooked) {
+      this.voicesHooked = true;
+      window.speechSynthesis.onvoiceschanged = load;
+    }
+  }
+
+  private pickEnglishVoice(): SpeechSynthesisVoice | null {
+    this.ensureBrowserVoices();
+    for (const name of PREFERRED_BROWSER_VOICES) {
+      const match = this.browserVoices.find((v) => v.name === name);
+      if (match) return match;
+    }
+    const enUs = this.browserVoices.find(
+      (v) => v.lang === "en-US" || v.lang.toLowerCase().startsWith("en-us"),
+    );
+    if (enUs) return enUs;
+    return (
+      this.browserVoices.find((v) => v.lang.toLowerCase().startsWith("en")) ??
+      null
+    );
+  }
+
+  private stopBrowserSpeech(): void {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+    } catch {
+      /* ignore */
+    }
   }
 
   private stopCurrent(): void {
@@ -79,6 +127,7 @@ class PremiumTTSManagerImpl {
     const ctx = this.getContext();
     void ctx.resume();
 
+    this.stopBrowserSpeech();
     this.stopCurrent();
 
     const source = ctx.createBufferSource();
@@ -105,6 +154,36 @@ class PremiumTTSManagerImpl {
     source.start(0);
   }
 
+  /** Free browser voice when ElevenLabs key/API is unavailable. */
+  private playBrowserFallback(text: string): void {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    try {
+      this.stopBrowserSpeech();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 0.92;
+      utterance.pitch = 0.85;
+      utterance.volume = 1;
+
+      const voice = this.pickEnglishVoice();
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang || "en-US";
+      }
+
+      // Mobile browsers often drop speak() right after cancel(); defer one tick.
+      window.setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          /* ignore */
+        }
+      }, 0);
+    } catch {
+      /* ignore */
+    }
+  }
+
   async playWord(word: string, options: PlayOptions = {}): Promise<void> {
     if (typeof window === "undefined") return;
     const text = word.trim();
@@ -112,6 +191,14 @@ class PremiumTTSManagerImpl {
 
     const generation = ++this.playGeneration;
     this.stopCurrent();
+    this.stopBrowserSpeech();
+
+    // Unlock audio on mobile (gesture-gated AudioContext).
+    try {
+      void this.getContext().resume();
+    } catch {
+      /* ignore */
+    }
 
     try {
       const buffer = await this.fetchAndDecode(text);
@@ -119,13 +206,18 @@ class PremiumTTSManagerImpl {
       this.playBuffer(buffer, options.gain ?? 1.35);
     } catch (err) {
       if (generation !== this.playGeneration) return;
-      console.error("[PremiumTTSManager]", err);
+      console.warn(
+        "[PremiumTTSManager] premium TTS unavailable, using browser voice",
+        err,
+      );
+      this.playBrowserFallback(text);
     }
   }
 
   cancel(): void {
     this.playGeneration += 1;
     this.stopCurrent();
+    this.stopBrowserSpeech();
   }
 
   clearCache(): void {
