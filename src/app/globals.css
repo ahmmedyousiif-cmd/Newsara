@@ -18,6 +18,7 @@
   --muted: #64748b;
   --progress-track: #edd9bc;
   --app-font-scale: 1;
+  --journey-path-color: #e8e0d4;
 }
 
 .dark {
@@ -35,6 +36,7 @@
   --card-border: #37464f;
   --muted: #94a3b8;
   --progress-track: #2e3e46;
+  --journey-path-color: #2e3e46;
 }
 
 @font-face {
@@ -172,6 +174,17 @@ body {
 
 .lesson-roadmap-scroll {
   padding-bottom: 0.5rem;
+}
+
+.learning-journey-viewport {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  touch-action: pan-y;
+}
+
+.bottom-navigation {
+  min-height: 68px;
 }
 
 @keyframes set-enter {

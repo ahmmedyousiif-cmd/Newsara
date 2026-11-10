@@ -1,13 +1,26 @@
-import { LessonMap, type LessonMapItem } from "@/components/dashboard/LessonMap";
+import { LearningJourney } from "@/components/dashboard/LearningJourney";
+import {
+  buildJourneyStations,
+  USE_JOURNEY_SCROLL_TEST,
+} from "../../../content/dev/journeyScrollTest";
 import lessonsJson from "../../../content/curriculum/lessons.json";
 
 const data = lessonsJson as {
-  lessons: LessonMapItem[];
+  lessons: Array<{
+    id: string;
+    number: number;
+    title: string;
+    titleAr: string;
+    unlocked: boolean;
+    href: string | null;
+  }>;
 };
+
+const stations = buildJourneyStations(data.lessons);
 
 export default function DashboardPage() {
   return (
-    <div dir="rtl" className="flex min-h-0 flex-1 flex-col gap-4">
+    <div dir="rtl" className="flex min-h-0 flex-1 flex-col gap-3">
       <header className="shrink-0 text-center">
         <h1
           dir="ltr"
@@ -15,11 +28,14 @@ export default function DashboardPage() {
         >
           English for Iraq
         </h1>
+        {USE_JOURNEY_SCROLL_TEST ? (
+          <p className="mt-1 text-[11px] font-semibold text-slate-400">
+            وضع تجربة السكرول — دروس إضافية مؤقتة
+          </p>
+        ) : null}
       </header>
 
-      <div className="lesson-roadmap-scroll min-h-0 flex-1">
-        <LessonMap lessons={data.lessons} />
-      </div>
+      <LearningJourney stations={stations} />
     </div>
   );
 }
