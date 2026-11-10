@@ -164,24 +164,12 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
-/* Native vertical scroll for tabs (title can stick above journey).
-   Parent must be height-locked (h-dvh + overflow-hidden) so this
-   becomes a real scrollport for mouse wheel and touch. */
-.tabs-main-scroll {
-  position: relative;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
-}
-
+/* Journey path: document scrolls. Do NOT set overflow-x:hidden here —
+   CSS turns that into overflow-y:auto and steals mouse-wheel / touch. */
 .learning-journey-viewport {
   position: relative;
   width: 100%;
-  overflow-x: hidden;
-  touch-action: pan-y;
+  overflow: visible;
 }
 
 .bottom-navigation {

@@ -58,7 +58,7 @@ export function LearningJourney({ stations }: LearningJourneyProps) {
 
   return (
     <div
-      className="learning-journey-viewport relative w-full overflow-x-hidden pb-6"
+      className="learning-journey-viewport relative w-full pb-6"
       dir="ltr"
     >
       <div

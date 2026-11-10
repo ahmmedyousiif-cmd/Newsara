@@ -18,8 +18,8 @@ const stations = buildJourneyStations(data.lessons);
 export default function DashboardPage() {
   return (
     <div dir="rtl" className="flex flex-col">
-      {/* Stays pinned while topics scroll underneath */}
-      <header className="sticky top-0 z-30 -mx-4 mb-2 border-b border-card-border/60 bg-cream-soft/95 px-4 pb-3 pt-1 text-center backdrop-blur-md dark:border-white/10 dark:bg-[#131F24]/95">
+      {/* Stays pinned while the page scrolls underneath */}
+      <header className="sticky top-0 z-30 -mx-4 mb-2 border-b border-card-border/60 bg-cream-soft/95 px-4 pb-3 pt-1 text-center backdrop-blur-md supports-[backdrop-filter]:bg-cream-soft/90 dark:border-white/10 dark:bg-[#131F24]/95">
         <h1
           dir="ltr"
           className="text-2xl font-extrabold tracking-tight text-black dark:text-white"
