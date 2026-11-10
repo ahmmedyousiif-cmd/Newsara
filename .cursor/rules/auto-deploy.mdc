@@ -1,0 +1,31 @@
+---
+description: Always deploy to Vercel/live after Agent work so the phone URL stays current
+alwaysApply: true
+---
+
+# Auto Deploy After Every Agent Request
+
+The user tests primarily on their **phone** via the live Vercel site.
+
+## Mandatory after every Agent-mode task that changes the app
+When you finish implementing a UI change, fix, feature, content update, or config that affects the running product:
+
+1. Commit the relevant changes (clear message; only when the work is complete and the user asked for the feature/fix — do not commit secrets like `.env.local`).
+2. **Push to `origin main` immediately** so Vercel redeploys.
+3. If push needs approval, request it; do not leave the fix local-only.
+4. Tell the user the live URL to open on the phone (prefer `https://newsara-red.vercel.app/` or the most relevant route such as `/lesson/1` or `/settings`).
+5. Mention briefly that the phone update appears after Vercel finishes (usually ~1 minute).
+
+## Default user intent
+Phrases like «نفذ», «اعمل», «صلح», «أضف» imply: **implement + publish to live**. Do not wait for a separate «انشر» unless deploy is blocked.
+
+## Exceptions (do not force deploy)
+- Ask mode (analysis only).
+- Cursor rules / docs-only changes that do not affect the live app (still commit if useful; push optional).
+- Explicit user request to keep changes local / not publish.
+- Destructive rollback or secret handling.
+
+## Live URLs
+- Home: `https://newsara-red.vercel.app/`
+- Lesson: `https://newsara-red.vercel.app/lesson/1`
+- Settings: `https://newsara-red.vercel.app/settings`
