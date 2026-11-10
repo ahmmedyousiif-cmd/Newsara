@@ -162,6 +162,18 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
+/* Tabs + lesson roadmap — smooth momentum scroll (cream/apricot palette unchanged) */
+.tabs-main-scroll {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.lesson-roadmap-scroll {
+  padding-bottom: 0.5rem;
+}
+
 @keyframes set-enter {
   from {
     opacity: 0;

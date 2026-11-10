@@ -7,8 +7,8 @@ const data = lessonsJson as {
 
 export default function DashboardPage() {
   return (
-    <div dir="rtl" className="flex flex-col gap-6">
-      <header className="text-center">
+    <div dir="rtl" className="flex min-h-0 flex-1 flex-col gap-4">
+      <header className="shrink-0 text-center">
         <h1
           dir="ltr"
           className="text-2xl font-extrabold tracking-tight text-black dark:text-white"
@@ -17,7 +17,9 @@ export default function DashboardPage() {
         </h1>
       </header>
 
-      <LessonMap lessons={data.lessons} />
+      <div className="lesson-roadmap-scroll min-h-0 flex-1">
+        <LessonMap lessons={data.lessons} />
+      </div>
     </div>
   );
 }
