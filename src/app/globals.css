@@ -164,8 +164,8 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
-/* Journey: fixed track layer + scrolling cards. Keep overflow visible
-   so wheel/touch stay on the document (overflow-x:hidden steals scroll). */
+/* Journey path: document scrolls. Do NOT set overflow-x:hidden here —
+   CSS turns that into overflow-y:auto and steals mouse-wheel / touch. */
 .learning-journey-viewport {
   position: relative;
   width: 100%;
