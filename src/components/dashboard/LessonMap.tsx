@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export type LessonMapItem = {
   id: string;
@@ -16,15 +22,130 @@ type LessonMapProps = {
   lessons: LessonMapItem[];
 };
 
+type ItemVisual = {
+  scale: number;
+  opacity: number;
+};
+
+const MIN_SCALE = 0.62;
+const MIN_OPACITY = 0.48;
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
+
+function findScrollParent(el: HTMLElement | null): HTMLElement | Window {
+  let node: HTMLElement | null = el;
+  while (node) {
+    const style = window.getComputedStyle(node);
+    const oy = style.overflowY;
+    if (
+      (oy === "auto" || oy === "scroll" || oy === "overlay") &&
+      node.scrollHeight > node.clientHeight + 1
+    ) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return window;
+}
+
+function visualFromDistance(distancePx: number, halfViewport: number): ItemVisual {
+  // 0 at center → 1 at ~half viewport away
+  const t = clamp(Math.abs(distancePx) / Math.max(1, halfViewport * 0.9), 0, 1);
+  // Smooth ease-out curve
+  const eased = t * t * (3 - 2 * t);
+  return {
+    scale: 1 - eased * (1 - MIN_SCALE),
+    opacity: 1 - eased * (1 - MIN_OPACITY),
+  };
+}
+
 export function LessonMap({ lessons }: LessonMapProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const [visuals, setVisuals] = useState<ItemVisual[]>(() =>
+    lessons.map(() => ({ scale: 1, opacity: 1 })),
+  );
+  const frameRef = useRef<number | null>(null);
+
+  const updateVisuals = useCallback(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const scroller = findScrollParent(root);
+    let viewportTop = 0;
+    let viewportHeight = window.innerHeight;
+
+    if (scroller instanceof HTMLElement) {
+      const rect = scroller.getBoundingClientRect();
+      viewportTop = rect.top;
+      viewportHeight = rect.height;
+    }
+
+    const centerY = viewportTop + viewportHeight / 2;
+    const half = viewportHeight / 2;
+
+    const next = lessons.map((_, index) => {
+      const el = itemRefs.current[index];
+      if (!el) return { scale: MIN_SCALE, opacity: MIN_OPACITY };
+      const rect = el.getBoundingClientRect();
+      const itemCenter = rect.top + rect.height / 2;
+      return visualFromDistance(itemCenter - centerY, half);
+    });
+
+    setVisuals(next);
+  }, [lessons]);
+
+  const scheduleUpdate = useCallback(() => {
+    if (frameRef.current != null) return;
+    frameRef.current = window.requestAnimationFrame(() => {
+      frameRef.current = null;
+      updateVisuals();
+    });
+  }, [updateVisuals]);
+
+  useLayoutEffect(() => {
+    updateVisuals();
+  }, [updateVisuals]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const scroller = findScrollParent(root);
+
+    const onScroll = () => scheduleUpdate();
+    const onResize = () => scheduleUpdate();
+
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => scheduleUpdate())
+        : null;
+    if (root) ro?.observe(root);
+
+    scheduleUpdate();
+
+    return () => {
+      scroller.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      ro?.disconnect();
+      if (frameRef.current != null) {
+        window.cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [scheduleUpdate]);
+
   return (
     <div
+      ref={rootRef}
       className="lesson-roadmap relative mx-auto w-full max-w-md"
       dir="ltr"
     >
-      {/* Soft curved guide line down the center */}
       <div
-        className="pointer-events-none absolute top-6 bottom-8 left-1/2 w-10 -translate-x-1/2"
+        className="pointer-events-none absolute top-8 bottom-10 left-1/2 w-10 -translate-x-1/2"
         aria-hidden
       >
         <svg
@@ -47,26 +168,36 @@ export function LessonMap({ lessons }: LessonMapProps) {
         </svg>
       </div>
 
-      <ol className="relative z-10 flex flex-col gap-5 py-1">
+      {/* Extra vertical padding so first/last can sit at visual center */}
+      <ol className="relative z-10 flex flex-col gap-6 py-[18vh]">
         {lessons.map((lesson, index) => {
           const leanLeft = index % 2 === 0;
           const label = `LESSON ${String(lesson.number).padStart(2, "0")}`;
           const isActive = lesson.unlocked;
+          const { scale, opacity } = visuals[index] ?? {
+            scale: 1,
+            opacity: 1,
+          };
+          // Gentle winding offset (same idea as sin path, project colors unchanged)
+          const windX = Math.sin(index * 0.85) * (leanLeft ? -10 : 10);
 
           return (
-            <motion.li
+            <li
               key={lesson.id}
-              className={`relative flex items-center ${
-                leanLeft ? "justify-start pe-[18%]" : "justify-end ps-[18%]"
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
+              className={`relative flex items-center will-change-transform ${
+                leanLeft ? "justify-start pe-[16%]" : "justify-end ps-[16%]"
               }`}
-              initial={{ opacity: 0.55, scale: 0.94, y: 12 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ amount: 0.55, margin: "-8% 0px -8% 0px" }}
-              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              style={{
+                transform: `translate3d(${windX}px, 0, 0) scale(${scale})`,
+                opacity,
+                transformOrigin: leanLeft ? "left center" : "right center",
+              }}
             >
-              {/* Path node */}
               <span
-                className={`absolute top-1/2 left-1/2 z-20 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
+                className={`absolute top-1/2 left-1/2 z-20 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow duration-200 ${
                   isActive
                     ? "bg-apricot shadow-[0_0_0_4px_rgba(240,160,90,0.28)]"
                     : "border-2 border-[#D9D0C4] bg-[#F9F6EE] dark:border-[#37464F] dark:bg-[#1F2E35]"
@@ -94,7 +225,7 @@ export function LessonMap({ lessons }: LessonMapProps) {
                     </p>
                   </Link>
                 ) : (
-                  <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-card-border/70 bg-card/50 px-3 py-3 opacity-70 dark:bg-[#1F2E35]/50">
+                  <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-card-border/70 bg-card/50 px-3 py-3 dark:bg-[#1F2E35]/50">
                     <div className="min-w-0">
                       <p className="text-[10px] font-extrabold tracking-[0.16em] text-slate-400">
                         {label}
@@ -112,7 +243,7 @@ export function LessonMap({ lessons }: LessonMapProps) {
                   </div>
                 )}
               </div>
-            </motion.li>
+            </li>
           );
         })}
       </ol>
