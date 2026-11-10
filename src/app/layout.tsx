@@ -53,7 +53,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${cairo.variable} ${cairo.className} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-cream-soft font-sans text-foreground dark:bg-[#131F24]">
+      <body className="flex h-full min-h-full flex-col overflow-hidden bg-cream-soft font-sans text-foreground dark:bg-[#131F24]">
         <ThemeProvider>
           <PreferencesProvider>
             {children}

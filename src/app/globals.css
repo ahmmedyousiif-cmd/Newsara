@@ -164,8 +164,12 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
-/* Native vertical scroll for tabs (title can stick above journey) */
+/* Native vertical scroll for tabs (title can stick above journey).
+   Parent must be height-locked (h-dvh + overflow-hidden) so this
+   becomes a real scrollport for mouse wheel and touch. */
 .tabs-main-scroll {
+  position: relative;
+  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
