@@ -67,6 +67,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
 
   const startedAtRef = useRef<number>(0);
   const [correctCount, setCorrectCount] = useState(0);
+  /** Solved units across whole lesson: each matched pair + each quiz item. */
+  const [completedUnits, setCompletedUnits] = useState(0);
   const [comboStreak, setComboStreak] = useState(0);
   const comboCurrentRef = useRef(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -81,11 +83,12 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const isTransitioning = stage.length > 1;
   const showingReward = currentIndex >= rewardIndex && !isTransitioning;
 
-  const stageProgress = useMemo(() => {
-    const totalStages = Math.max(1, rewardIndex);
-    const clamped = Math.min(currentIndex, rewardIndex);
-    return Math.round((clamped / totalStages) * 100);
-  }, [currentIndex, rewardIndex]);
+  const lessonProgress = useMemo(() => {
+    const total = Math.max(1, totalQuestions);
+    return Math.round(
+      (Math.min(completedUnits, total) / total) * 100,
+    );
+  }, [completedUnits, totalQuestions]);
 
   const bumpCombo = useCallback(() => {
     comboCurrentRef.current += 1;
@@ -98,6 +101,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
 
   const handlePairMatched = useCallback(() => {
     setCorrectCount((n) => n + 1);
+    setCompletedUnits((n) => n + 1);
     bumpCombo();
   }, [bumpCombo]);
 
@@ -107,6 +111,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
 
   const handleQuizResult = useCallback(
     (correct: boolean) => {
+      setCompletedUnits((n) => n + 1);
       if (correct) {
         setCorrectCount((n) => n + 1);
         bumpCombo();
@@ -237,10 +242,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 key={quizItem.id}
                 instruction={translateActivity.instruction}
                 item={quizItem}
-                progress={Math.max(
-                  stageProgress,
-                  Math.round(((index + 1) / rewardIndex) * 100),
-                )}
+                progress={lessonProgress}
                 interactionLocked={isTransitioning || showingReward}
                 onResult={
                   index === currentIndex && !isTransitioning
@@ -259,9 +261,18 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 wordSet={sets[index]!}
                 instruction={activity.instruction}
                 isLastSet={index >= sets.length - 1}
+                lessonProgress={lessonProgress}
                 interactionLocked={isTransitioning || showingReward}
-                onPairMatched={handlePairMatched}
-                onPairMissed={handlePairMissed}
+                onPairMatched={
+                  index === currentIndex && !isTransitioning
+                    ? handlePairMatched
+                    : undefined
+                }
+                onPairMissed={
+                  index === currentIndex && !isTransitioning
+                    ? handlePairMissed
+                    : undefined
+                }
                 onSetComplete={
                   index === currentIndex && !isTransitioning
                     ? handleSetComplete

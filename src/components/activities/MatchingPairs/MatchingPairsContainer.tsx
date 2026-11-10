@@ -22,6 +22,11 @@ type MatchingPairsContainerProps = {
   isLastSet?: boolean;
   /** Blocks input during group slide transition. */
   interactionLocked?: boolean;
+  /**
+   * Lesson-wide progress 0–100 (all matching pairs + later quiz steps).
+   * When omitted, falls back to this board only.
+   */
+  lessonProgress?: number;
   /** Fired after the last pair of this set is solved (post-jump). */
   onSetComplete: () => void;
   /** Fired when a pair is matched successfully. */
@@ -35,6 +40,7 @@ export function MatchingPairsContainer({
   instruction,
   isLastSet = true,
   interactionLocked = false,
+  lessonProgress,
   onSetComplete,
   onPairMatched,
   onPairMissed,
@@ -71,7 +77,13 @@ export function MatchingPairsContainer({
     };
   }, []);
 
-  const progress = Math.round((matchedIds.length / baseCards.length) * 100);
+  const boardProgress = Math.round(
+    (matchedIds.length / Math.max(1, baseCards.length)) * 100,
+  );
+  const progress = Math.min(
+    100,
+    Math.max(0, lessonProgress ?? boardProgress),
+  );
 
   const handleCardClick = (item: MatchCard) => {
     if (interactionLocked) return;
