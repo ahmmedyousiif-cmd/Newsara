@@ -9,6 +9,7 @@ import {
   playCompleteSound,
   playContinueRoundSound,
   playFinaleSound,
+  vibrateMatchingComplete,
 } from "@/lib/sounds";
 import { formatArabicDate } from "@/lib/rewardCopy";
 import { getActivitySets, type MatchingActivity } from "@/types/matching";
@@ -158,7 +159,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
 
     const isLastMatching = currentIndex >= sets.length - 1;
     if (isLastMatching) {
-      // After final matching set → first translate question (or reward if none).
+      // Both matching boards done — haptic, then quiz / reward.
+      vibrateMatchingComplete();
       slideTo(quizStart < rewardIndex ? quizStart : rewardIndex);
       return;
     }

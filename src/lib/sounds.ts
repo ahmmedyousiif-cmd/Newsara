@@ -135,16 +135,30 @@ export function playCompleteSound() {
   playFile(SOUND_FILES.complete);
 }
 
-/** Physical haptic pulse — essential for “continue to next round” feedback. */
-export function vibrateContinuePulse() {
+function vibratePattern(pattern: number | number[]) {
   if (typeof navigator === "undefined") return;
   if (typeof navigator.vibrate !== "function") return;
   try {
-    // Impact → short rhythmic fade (ms: vibrate, gap, vibrate, gap, …)
-    navigator.vibrate([60, 35, 40, 45, 32, 50, 26, 60, 20, 80, 16, 100, 12]);
+    navigator.vibrate(pattern);
   } catch {
     /* unsupported / blocked */
   }
+}
+
+/** Physical haptic pulse — essential for “continue to next round” feedback. */
+export function vibrateContinuePulse() {
+  // Impact → short rhythmic fade (ms: vibrate, gap, vibrate, gap, …)
+  vibratePattern([60, 35, 40, 45, 32, 50, 26, 60, 20, 80, 16, 100, 12]);
+}
+
+/** After finishing both matching boards — confident double pulse. */
+export function vibrateMatchingComplete() {
+  vibratePattern([70, 40, 55, 50, 35, 70, 25, 90, 18]);
+}
+
+/** With finale music at end of whole exercise — longer celebratory rumble. */
+export function vibrateFinalePulse() {
+  vibratePattern([80, 30, 55, 35, 45, 40, 35, 50, 30, 70, 25, 90, 20, 110, 15]);
 }
 
 /**
@@ -273,9 +287,14 @@ export function playWhatsAppTransitionSound() {
   playContinueRoundSound();
 }
 
-/** End of last group — audio from New folder. */
+/** End of whole exercise — finale audio + celebratory haptic. */
 export function playFinaleSound() {
+  vibrateFinalePulse();
   playFile(SOUND_FILES.finale);
+  // Soft echo haptic while the finale plays
+  window.setTimeout(() => {
+    vibratePattern([40, 45, 30, 60, 22, 80, 16]);
+  }, 500);
 }
 
 /** Luxurious celebratory music between word sets (file). */
