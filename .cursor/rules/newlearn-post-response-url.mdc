@@ -1,20 +1,23 @@
 ---
-description: After every agent reply, always share the updated local app URL
+description: بعد كل رد Agent أعطِ رابط الهاتف الحي أولاً ثم المحلي إن وُجد
 alwaysApply: true
 ---
 
-# Post-Response App Link
+# روابط بعد كل طلب Agent
 
-After finishing **every** Agent-mode request (UI change, fix, feature, or config), end the reply with the current local entry URL the user can open.
+في نهاية **كل** طلب Agent (واجهة، إصلاح، ميزة، إعدادات): أعطِ الروابط بوضوح.
 
-## Rules
-- Always include a clickable absolute URL (e.g. `http://localhost:3000/`).
-- Prefer the **most relevant route** for what just changed (home, lesson, settings, etc.).
-- If the route is unknown, default to the app home URL.
-- Read the active `npm run dev` terminal when needed to confirm host/port; do not invent a dead port.
-- Keep this as a short final line — do not bury it mid-answer.
+## الأولوية
+1. **رابط الهاتف الحي (إلزامي بعد أي نشر):** `https://newsara-red.vercel.app/` أو المسار المناسب.
+2. **رابط محلي (إن كان السيرفر شغّال):** مثل `http://localhost:3000/`.
 
-## Example endings
-- `افتح: http://localhost:3000/`
-- `افتح التمرين: http://localhost:3000/lesson/1`
-- `افتح الإعدادات: http://localhost:3000/settings`
+## قواعد
+- المسار الأنسب لما تغيّر (الرئيسية / درس / إعدادات).
+- إن لم يُعرف المسار: الرئيسية.
+- لا تخترع منفذاً محلياً ميتاً؛ اقرأ طرفية `npm run dev` عند الحاجة.
+- سطران قصيران في نهاية الرد كافيان.
+
+## أمثلة
+- `افتح على الهاتف: https://newsara-red.vercel.app/`
+- `افتح الدرس على الهاتف: https://newsara-red.vercel.app/lesson/1`
+- `افتح محلياً: http://localhost:3000/`

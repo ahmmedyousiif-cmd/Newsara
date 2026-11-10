@@ -1,31 +1,40 @@
 ---
-description: Always deploy to Vercel/live after Agent work so the phone URL stays current
+description: إلزامي — بعد كل طلب Agent انشر فوراً على Vercel لكل الأجهزة خاصة الهاتف
 alwaysApply: true
 ---
 
-# Auto Deploy After Every Agent Request
+# نشر تلقائي بعد كل طلب Agent (الهاتف أولاً)
 
-The user tests primarily on their **phone** via the live Vercel site.
+المستخدم يختبر غالباً من **الهاتف** عبر الموقع الحي على Vercel، وليس من الكمبيوتر فقط.
 
-## Mandatory after every Agent-mode task that changes the app
-When you finish implementing a UI change, fix, feature, content update, or config that affects the running product:
+## قاعدة إلزامية — لا تنتهِ طلب Agent بدون نشر
+بعد أي تنفيذ في Agent mode يغيّر التطبيق (واجهة، إصلاح، ميزة، محتوى، أصوات، إعدادات ظاهرة للمستخدم):
 
-1. Commit the relevant changes (clear message; only when the work is complete and the user asked for the feature/fix — do not commit secrets like `.env.local`).
-2. **Push to `origin main` immediately** so Vercel redeploys.
-3. If push needs approval, request it; do not leave the fix local-only.
-4. Tell the user the live URL to open on the phone (prefer `https://newsara-red.vercel.app/` or the most relevant route such as `/lesson/1` or `/settings`).
-5. Mention briefly that the phone update appears after Vercel finishes (usually ~1 minute).
+1. **أنهِ العمل** ثم اعمل commit واضح (بدون أسرار مثل `.env.local`).
+2. **ادفع فوراً إلى `origin main`** حتى يعيد Vercel البناء والنشر لكل الأجهزة.
+3. إذا احتاج الدفع موافقة (smart mode / protected main): اطلبها فوراً — **ممنوع** ترك التعديل محلياً فقط.
+4. في نهاية الرد أعطِ رابط الهاتف الحي المناسب، مثل:
+   - الرئيسية: `https://newsara-red.vercel.app/`
+   - الدرس: `https://newsara-red.vercel.app/lesson/1`
+   - الإعدادات: `https://newsara-red.vercel.app/settings`
+5. قل بجملة قصيرة: التحديث يصل للهاتف بعد انتهاء Vercel (غالباً حوالي دقيقة).
 
-## Default user intent
-Phrases like «نفذ», «اعمل», «صلح», «أضف» imply: **implement + publish to live**. Do not wait for a separate «انشر» unless deploy is blocked.
+## نية المستخدم الافتراضية = نفّذ + انشر
+عبارات مثل: «نفذ»، «اعمل»، «صلح»، «أضف»، «Agent»، «ثبّت»، «انشر» تعني:
+**نفّذ التغيير + commit + push إلى main + أخبر برابط الهاتف.**
 
-## Exceptions (do not force deploy)
-- Ask mode (analysis only).
-- Cursor rules / docs-only changes that do not affect the live app (still commit if useful; push optional).
-- Explicit user request to keep changes local / not publish.
-- Destructive rollback or secret handling.
+لا تنتظر رسالة منفصلة «انشر» إلا إذا قال صراحة: أبقِه محلياً / لا تنشر.
 
-## Live URLs
-- Home: `https://newsara-red.vercel.app/`
-- Lesson: `https://newsara-red.vercel.app/lesson/1`
-- Settings: `https://newsara-red.vercel.app/settings`
+هذه القاعدة تتفوق على أي عادة عامة مثل «لا تعمل commit إلا إذا طُلب» — في مشروع NewLearn طلب التنفيذ يشمل النشر للهاتف.
+
+## استثناءات فقط
+- Ask mode (تحليل بدون تعديل ملفات).
+- طلب صريح: لا تنشر / أبقِ محلياً.
+- أوامر تدميرية (rollback) أو التعامل مع أسرار.
+
+حتى تعديلات قواعد Cursor المفيدة للمشروع: يُفضَّل commit + push حتى تبقى محفوظة مع المستودع.
+
+## تذكير
+- الجهاز الأهم = **الهاتف**.
+- الرابط الحي أهم من localhost عند انتهاء الطلب.
+- إن فشل البناء على Vercel: أصلح وادفع مرة أخرى في نفس الجلسة إن أمكن.
