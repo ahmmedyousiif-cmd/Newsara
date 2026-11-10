@@ -5,7 +5,11 @@ import Link from "next/link";
 import { LayoutGroup } from "framer-motion";
 import { FeedbackSheet } from "./FeedbackSheet";
 import { WordChip } from "./WordChip";
-import { playSuccessSound, playWrongSound, playCorrectClick } from "@/lib/sounds";
+import {
+  playFinaleSound,
+  playSuccessSound,
+  playWrongSound,
+} from "@/lib/sounds";
 import { gradeTypedAnswer, normalizeAnswer } from "@/lib/typo";
 import { shuffleCards } from "@/types/matching";
 import type {
@@ -21,6 +25,8 @@ type TranslateWordQuizProps = {
   item: TranslateItem;
   /** 0–100 overall lesson progress for the header. */
   progress: number;
+  /** Last question in the lesson — play finale tone instead of success. */
+  isFinalItem?: boolean;
   interactionLocked?: boolean;
   onResult?: (correct: boolean) => void;
   onContinue: () => void;
@@ -37,6 +43,7 @@ export function TranslateWordQuiz({
   instruction,
   item,
   progress,
+  isFinalItem = false,
   interactionLocked = false,
   onResult,
   onContinue,
@@ -129,22 +136,20 @@ export function TranslateWordQuiz({
   const handleSelectBankWord = (word: BankWord) => {
     if (locked) return;
     if (selectedIds[0] === word.id) return;
-    playCorrectClick();
     flashPress(word.id);
     setSelectedIds([word.id]);
   };
 
   const handleDeselectBankWord = (word: BankWord) => {
     if (locked) return;
-    playCorrectClick();
     flashPress(word.id);
     setSelectedIds((prev) => prev.filter((id) => id !== word.id));
   };
 
   const handleSelectVertical = (optionId: string) => {
     if (locked) return;
-    playCorrectClick();
     // Tap again to clear; otherwise replace selection (single choice).
+    // No tap tone — only success/error plays on check.
     setVerticalSelectedId((prev) => (prev === optionId ? null : optionId));
   };
 
@@ -175,7 +180,9 @@ export function TranslateWordQuiz({
 
     scoredRef.current = true;
     if (next === "SUCCESS" || next === "TYPO") {
-      playSuccessSound();
+      // One tone only: finale on last question, otherwise single success file.
+      if (isFinalItem) playFinaleSound();
+      else playSuccessSound();
       onResult?.(true);
     } else {
       playWrongSound();

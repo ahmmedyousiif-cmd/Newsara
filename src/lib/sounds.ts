@@ -145,10 +145,10 @@ function vibratePattern(pattern: number | number[]) {
   }
 }
 
-/** Physical haptic pulse — essential for “continue to next round” feedback. */
+/** Physical haptic pulse — ~1s continue-round feedback. */
 export function vibrateContinuePulse() {
-  // Impact → short rhythmic fade (ms: vibrate, gap, vibrate, gap, …)
-  vibratePattern([60, 35, 40, 45, 32, 50, 26, 60, 20, 80, 16, 100, 12]);
+  // Impact → short rhythmic fade within about one second
+  vibratePattern([55, 30, 40, 35, 30, 40, 22, 50, 16, 60, 12]);
 }
 
 /** After finishing both matching boards — confident double pulse. */
@@ -162,16 +162,14 @@ export function vibrateFinalePulse() {
 }
 
 /**
- * After matching set 1 → set 2: ~2.5s motivational “great — continue” cue.
- * Soft success hit + rising momentum (not a final course celebration).
- * Always triggers haptic pulse when the platform allows it.
+ * After matching set 1 → set 2: ~1s motivational cue + haptic.
+ * Short hit + rising two-note push (not a long celebration).
  */
 export function playContinueRoundSound() {
   vibrateContinuePulse();
 
   const ctx = getCtx();
   if (!ctx) {
-    // Haptic already fired; fall back to file if Web Audio unavailable.
     playFile(SOUND_FILES.whatsappTransition);
     return;
   }
@@ -183,100 +181,36 @@ export function playContinueRoundSound() {
     master.gain.setValueAtTime(0.9, now);
     master.connect(ctx.destination);
 
-    // 1) Soft confident success hit + low rumble pulse
+    // Soft success hit (~0.25s)
     const hit = ctx.createOscillator();
     const hitGain = ctx.createGain();
-    const hitFilter = ctx.createBiquadFilter();
     hit.type = "triangle";
-    hit.frequency.setValueAtTime(392, now); // G4
-    hit.frequency.exponentialRampToValueAtTime(262, now + 0.18);
-    hitFilter.type = "lowpass";
-    hitFilter.frequency.value = 1800;
+    hit.frequency.setValueAtTime(392, now);
+    hit.frequency.exponentialRampToValueAtTime(262, now + 0.16);
     hitGain.gain.setValueAtTime(0.0001, now);
-    hitGain.gain.linearRampToValueAtTime(0.55, now + 0.012);
-    hitGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
-    hit.connect(hitFilter);
-    hitFilter.connect(hitGain);
+    hitGain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+    hitGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    hit.connect(hitGain);
     hitGain.connect(master);
     hit.start(now);
-    hit.stop(now + 0.34);
+    hit.stop(now + 0.3);
 
-    const rumble = ctx.createOscillator();
-    const rumbleGain = ctx.createGain();
-    rumble.type = "sine";
-    rumble.frequency.setValueAtTime(72, now);
-    rumble.frequency.exponentialRampToValueAtTime(42, now + 0.28);
-    rumbleGain.gain.setValueAtTime(0.0001, now);
-    rumbleGain.gain.linearRampToValueAtTime(0.42, now + 0.02);
-    rumbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
-    rumble.connect(rumbleGain);
-    rumbleGain.connect(master);
-    rumble.start(now);
-    rumble.stop(now + 0.4);
-
-    // 2) Rising motivational progression (forward momentum, not finale)
-    // C5 → E5 → G5 → C6 with overlapping soft attacks
-    const melody = [523.25, 659.25, 783.99, 1046.5];
+    // Short rising push: E5 → G5 (fits in ~1s total)
+    const melody = [659.25, 783.99];
     melody.forEach((freq, index) => {
-      const start = now + 0.22 + index * 0.38;
-      const sine = ctx.createOscillator();
-      const tri = ctx.createOscillator();
+      const start = now + 0.18 + index * 0.28;
+      const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      sine.type = "sine";
-      tri.type = "triangle";
-      sine.frequency.setValueAtTime(freq, start);
-      tri.frequency.setValueAtTime(freq * 2, start);
-
-      filter.type = "highshelf";
-      filter.frequency.value = 2400;
-      filter.gain.value = 4;
-
-      const peak = 0.28 + index * 0.04;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.linearRampToValueAtTime(peak, start + 0.05);
-      gain.gain.setValueAtTime(peak * 0.7, start + 0.28);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.85);
-
-      sine.connect(filter);
-      tri.connect(filter);
-      filter.connect(gain);
+      gain.gain.linearRampToValueAtTime(0.32, start + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
+      osc.connect(gain);
       gain.connect(master);
-      sine.start(start);
-      tri.start(start);
-      sine.stop(start + 0.9);
-      tri.stop(start + 0.9);
+      osc.start(start);
+      osc.stop(start + 0.5);
     });
-
-    // 3) Gentle forward “push” pad that fades (invites next round)
-    const pad = ctx.createOscillator();
-    const pad2 = ctx.createOscillator();
-    const padGain = ctx.createGain();
-    pad.type = "sine";
-    pad2.type = "sine";
-    pad.frequency.setValueAtTime(523.25, now + 0.35);
-    pad2.frequency.setValueAtTime(783.99, now + 0.35);
-    padGain.gain.setValueAtTime(0.0001, now + 0.35);
-    padGain.gain.linearRampToValueAtTime(0.14, now + 0.7);
-    padGain.gain.setValueAtTime(0.12, now + 1.9);
-    padGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.55);
-    pad.connect(padGain);
-    pad2.connect(padGain);
-    padGain.connect(master);
-    pad.start(now + 0.35);
-    pad2.start(now + 0.35);
-    pad.stop(now + 2.6);
-    pad2.stop(now + 2.6);
-
-    // Soft delayed haptic echo while melody rises (platforms that allow chaining)
-    window.setTimeout(() => {
-      try {
-        navigator.vibrate?.([28, 40, 22, 55, 16]);
-      } catch {
-        /* ignore */
-      }
-    }, 420);
   } catch {
     playFile(SOUND_FILES.whatsappTransition);
   }

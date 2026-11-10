@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { TranslateWordQuiz } from "./TranslateWordQuiz";
-import { playFinaleSound } from "@/lib/sounds";
 import type { TranslateActivity } from "@/types/translate";
 
 type TranslateActivityFlowProps = {
@@ -18,7 +17,7 @@ export function TranslateActivityFlow({ activity }: TranslateActivityFlowProps) 
   const handleContinue = useCallback(() => {
     const next = index + 1;
     if (next >= items.length) {
-      playFinaleSound();
+      // Finale already played on last-question check when correct.
       return;
     }
     setIndex(next);
@@ -39,6 +38,7 @@ export function TranslateActivityFlow({ activity }: TranslateActivityFlowProps) 
         instruction={activity.instruction}
         item={item}
         progress={progress}
+        isFinalItem={index === items.length - 1}
         onContinue={handleContinue}
       />
     </div>

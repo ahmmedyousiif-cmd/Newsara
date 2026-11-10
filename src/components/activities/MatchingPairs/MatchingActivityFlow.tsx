@@ -64,6 +64,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const [outgoingExiting, setOutgoingExiting] = useState(false);
   const [incomingActive, setIncomingActive] = useState(false);
   const lockRef = useRef(false);
+  const finalePlayedRef = useRef(false);
 
   const startedAtRef = useRef<number>(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -115,11 +116,15 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
       if (correct) {
         setCorrectCount((n) => n + 1);
         bumpCombo();
+        // Finale already starts inside the quiz when isFinalItem.
+        if (currentIndex === rewardIndex - 1) {
+          finalePlayedRef.current = true;
+        }
       } else {
         breakCombo();
       }
     },
-    [bumpCombo, breakCombo],
+    [bumpCombo, breakCombo, currentIndex, rewardIndex],
   );
 
   const slideTo = useCallback(
@@ -152,7 +157,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
             Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
           );
           setRewardDate(formatArabicDate());
-          playFinaleSound();
+          // Finale plays on last-question check (or continue if missed) — not after slide.
         }
       }, SLIDE_MS);
     },
@@ -177,7 +182,17 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const handleQuizContinue = useCallback(() => {
     if (lockRef.current) return;
     const next = currentIndex + 1;
-    slideTo(next >= rewardIndex ? rewardIndex : next);
+    if (next >= rewardIndex) {
+      // Last question was wrong (or tone missed) — start finale now, not after slide.
+      if (!finalePlayedRef.current) {
+        finalePlayedRef.current = true;
+        playFinaleSound();
+      }
+      slideTo(rewardIndex, "none");
+      return;
+    }
+    // Between quiz items: no extra chime (correct already played its one tone).
+    slideTo(next, "none");
   }, [currentIndex, rewardIndex, slideTo]);
 
   if (!sets.length) {
@@ -243,6 +258,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 instruction={translateActivity.instruction}
                 item={quizItem}
                 progress={lessonProgress}
+                isFinalItem={index === rewardIndex - 1}
                 interactionLocked={isTransitioning || showingReward}
                 onResult={
                   index === currentIndex && !isTransitioning

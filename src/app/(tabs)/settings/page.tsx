@@ -49,25 +49,6 @@ export default function SettingsPage() {
       </section>
 
       <section className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
-        <h2 className="mb-2 text-sm font-extrabold text-slate-800 dark:text-slate-100">
-          تثبيت كتطبيق
-        </h2>
-        <p className="mb-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          يمكنك تثبيت NEW LEARN على الهاتف أو الحاسوب ليفتح مثل التطبيق بدون متصفح ظاهر.
-        </p>
-        <ul className="list-disc space-y-1 pe-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          <li>
-            أندرويد / كروم: من قائمة المتصفح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة
-            الرئيسية».
-          </li>
-          <li>
-            آيفون: زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».
-          </li>
-          <li>ويندوز / ماك (كروم أو إيدج): أيقونة التثبيت في شريط العنوان.</li>
-        </ul>
-      </section>
-
-      <section className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-extrabold text-slate-800 dark:text-slate-100">
           حجم الخط
         </h2>
