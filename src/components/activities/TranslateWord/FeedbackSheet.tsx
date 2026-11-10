@@ -16,13 +16,13 @@ const COPY = {
     button: "bg-white text-[#58CC02]",
   },
   TYPO: {
-    title: "تقريباً صحيح — خطأ إملائي",
+    title: "أنت قريب من الإجابة الصحيحة",
     subtitle: null as string | null,
     sheet: "bg-[#58CC02]",
     button: "bg-white text-[#58CC02]",
   },
   ERROR: {
-    title: "الإجابة الصحيحة:",
+    title: "إجابة خاطئة",
     subtitle: null as string | null,
     sheet: "bg-[#FF4B4B]",
     button: "bg-white text-[#E03E3E]",
@@ -54,20 +54,17 @@ export function FeedbackSheet({
           </p>
         ) : null}
 
+        {/* Near miss: auto-reveal the correct spelling, then continue. */}
         {state === "TYPO" ? (
           <p dir="rtl" className="mt-2 text-base font-bold text-white/95">
-            الإملاء الصحيح:{" "}
+            الإجابة الصحيحة:{" "}
             <span dir="ltr" className="inline-block underline decoration-2">
               {correctAnswer}
             </span>
           </p>
         ) : null}
 
-        {state === "ERROR" ? (
-          <p dir="ltr" className="mt-2 text-2xl font-extrabold text-white">
-            {correctAnswer}
-          </p>
-        ) : null}
+        {/* Far wrong: message only — no auto-solve. */}
 
         <button
           type="button"

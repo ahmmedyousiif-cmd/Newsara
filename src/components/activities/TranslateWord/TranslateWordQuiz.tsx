@@ -282,8 +282,9 @@ export function TranslateWordQuiz({
                     if (e.key === "Enter") handleCheck();
                   }}
                   dir="ltr"
-                  placeholder="اكتب الترجمة…"
-                  className="w-full touch-manipulation rounded-2xl border-2 border-b-4 border-card-border bg-card px-12 py-3.5 text-center text-xl font-extrabold text-black outline-none transition-[border-color,box-shadow,background-color] duration-150 ease-out focus:border-[#1CB0F6] focus:bg-[#DDF4FF]/40 focus:shadow-[0_0_0_3px_rgba(28,176,246,0.2)] disabled:opacity-60 dark:text-white dark:focus:bg-[#1A3A4A]/50"
+                  placeholder="Type in English…"
+                  aria-label="اكتب الترجمة بالإنجليزي"
+                  className="w-full touch-manipulation rounded-2xl border-2 border-b-4 border-card-border bg-card px-12 py-3.5 text-center text-xl font-extrabold text-black outline-none transition-[border-color,box-shadow,background-color] duration-150 ease-out placeholder:text-base placeholder:font-bold placeholder:text-slate-400 focus:border-[#1CB0F6] focus:bg-[#DDF4FF]/40 focus:shadow-[0_0_0_3px_rgba(28,176,246,0.2)] disabled:opacity-60 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#1A3A4A]/50"
                 />
                 {typed.trim().length > 0 && !locked ? (
                   <button

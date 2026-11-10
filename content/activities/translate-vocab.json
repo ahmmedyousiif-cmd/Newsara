@@ -38,6 +38,13 @@
         { "id": "sugar", "text": "sugar" },
         { "id": "book", "text": "book" }
       ]
+    },
+    {
+      "id": "tr-5",
+      "mode": "text-input",
+      "promptAr": "شاي",
+      "answer": "tea",
+      "acceptedAnswers": ["Tea", "TEA"]
     }
   ]
 }
