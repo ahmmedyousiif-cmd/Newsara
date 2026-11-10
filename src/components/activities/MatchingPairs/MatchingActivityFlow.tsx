@@ -7,8 +7,8 @@ import { TranslateWordQuiz } from "@/components/activities/TranslateWord/Transla
 import { RewardScreen } from "@/components/reward/RewardScreen";
 import {
   playCompleteSound,
+  playContinueRoundSound,
   playFinaleSound,
-  playWhatsAppTransitionSound,
 } from "@/lib/sounds";
 import { formatArabicDate } from "@/lib/rewardCopy";
 import { getActivitySets, type MatchingActivity } from "@/types/matching";
@@ -117,7 +117,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   );
 
   const slideTo = useCallback(
-    (next: number, sound: "complete" | "whatsapp" | "none" = "complete") => {
+    (next: number, sound: "complete" | "continue" | "none" = "complete") => {
       if (lockRef.current) return;
       lockRef.current = true;
 
@@ -125,7 +125,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
       setOutgoingExiting(false);
       setIncomingActive(false);
 
-      if (sound === "whatsapp") playWhatsAppTransitionSound();
+      if (sound === "continue") playContinueRoundSound();
       else if (sound === "complete") playCompleteSound();
 
       requestAnimationFrame(() => {
@@ -163,8 +163,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
       return;
     }
 
-    // Matching set 1 → set 2: WhatsApp transition clip
-    slideTo(currentIndex + 1, "whatsapp");
+    // Matching set 1 → set 2: motivational continue cue + haptic
+    slideTo(currentIndex + 1, "continue");
   }, [currentIndex, sets.length, quizStart, rewardIndex, slideTo]);
 
   const handleQuizContinue = useCallback(() => {
