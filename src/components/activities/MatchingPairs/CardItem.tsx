@@ -22,6 +22,11 @@ export function CardItem({
   return (
     <button
       type="button"
+      data-review="match"
+      data-review-pair={item.pairId}
+      data-review-side={item.type}
+      data-review-matched={isMatched ? "1" : "0"}
+      data-review-busy={isCelebrating || isError ? "1" : "0"}
       onClick={() => onSelect(item)}
       disabled={(isMatched && item.type === "ar") || isCelebrating}
       dir={item.type === "en" ? "ltr" : "rtl"}

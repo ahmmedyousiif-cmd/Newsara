@@ -153,7 +153,11 @@ export function MatchingPairsContainer({
   };
 
   return (
-    <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft px-4 pb-8 pt-4 select-none dark:bg-[#131F24]">
+    <div
+      data-review-locked={interactionLocked ? "1" : "0"}
+      data-review-scope={wordSet.id}
+      className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft px-4 pb-8 pt-4 select-none dark:bg-[#131F24]"
+    >
       <div className="flex items-center gap-2 py-2" dir="rtl">
         <Link
           href="/"

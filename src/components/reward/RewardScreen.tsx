@@ -83,6 +83,7 @@ export function RewardScreen({
   return (
     <div
       dir="rtl"
+      data-review="done"
       className="flex h-full min-h-0 w-full flex-col bg-cream-soft font-[family-name:var(--font-cairo-family),Cairo,sans-serif] select-none dark:bg-[#131F24]"
     >
       {/* Stats sit just above CTA; spare height stays above the block */}
@@ -215,6 +216,7 @@ export function RewardScreen({
         <div className="mx-auto flex w-full max-w-md flex-col gap-2">
           <button
             type="button"
+            data-review="retry"
             onClick={handleRetry}
             className="flex min-h-11 w-full items-center justify-center rounded-full bg-apricot text-sm font-extrabold text-white transition-transform duration-200 active:scale-95 dark:bg-apricot-deep"
           >

@@ -96,7 +96,11 @@ export function DictationQuiz({
       : null;
 
   return (
-    <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]">
+    <div
+      data-review-scope={item.id}
+      data-review-locked={interactionLocked ? "1" : "0"}
+      className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]"
+    >
       <LessonTopBar
         progress={progress}
         showDictation
@@ -134,6 +138,8 @@ export function DictationQuiz({
             }}
             dir="ltr"
             placeholder="اكتب الترجمة"
+            data-review="typed"
+            data-review-answer={item.answerEn}
             aria-label="اكتب الترجمة بالإنجليزي"
             className="w-full max-w-sm touch-manipulation rounded-2xl border-2 border-b-4 border-card-border bg-card px-4 py-3.5 text-center text-2xl font-extrabold text-black outline-none placeholder:text-base placeholder:font-bold placeholder:text-slate-400 focus:border-[#1CB0F6] disabled:opacity-60 dark:text-white dark:placeholder:text-slate-500"
           />
@@ -143,6 +149,7 @@ export function DictationQuiz({
           <div className="relative z-[30] mt-auto shrink-0 pb-2 pt-3">
             <button
               type="button"
+              data-review="check"
               disabled={!canCheck}
               onClick={handleCheck}
               className={`flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#58CC02] text-lg font-extrabold text-white transition-[opacity,transform,filter] duration-200 ease-out active:scale-[0.98] ${

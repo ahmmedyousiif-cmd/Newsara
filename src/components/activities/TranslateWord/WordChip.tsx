@@ -10,6 +10,8 @@ type WordChipProps = {
   /** Instant visual confirmation that this chip is part of the answer. */
   selected?: boolean;
   onTap?: () => void;
+  reviewStep?: number;
+  reviewBank?: boolean;
 };
 
 export function WordChip({
@@ -19,6 +21,8 @@ export function WordChip({
   ghost = false,
   selected = false,
   onTap,
+  reviewStep = -1,
+  reviewBank = false,
 }: WordChipProps) {
   if (ghost) {
     return (
@@ -34,6 +38,9 @@ export function WordChip({
   return (
     <motion.button
       type="button"
+      data-review="token"
+      data-review-step={reviewStep}
+      data-review-bank={reviewBank ? "1" : "0"}
       layoutId={`chip-${id}`}
       transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
       disabled={disabled}

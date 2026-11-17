@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { ExerciseReviewDock } from "@/components/dev/ExerciseReviewDock";
 import { MatchingActivityFlow } from "@/components/activities/MatchingPairs/MatchingActivityFlow";
 import { PastSimpleExercise } from "@/components/activities/SentenceBuild/PastSimpleExercise";
 import type { MatchingActivity } from "@/types/matching";
@@ -48,6 +49,7 @@ export default function LessonPage({ params }: LessonPageProps) {
       }
     >
       <LessonContent params={params} />
+      <ExerciseReviewDock />
     </Suspense>
   );
 }

@@ -169,6 +169,22 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
   const praise = encouragementForStep(index, items.length);
   const palette = dark ? chipColors.dark : chipColors.light;
+  const stepById = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!item) return map;
+    const used = new Set<string>();
+    item.answer.forEach((word, step) => {
+      const token = bank.find(
+        (entry) =>
+          !used.has(entry.id) &&
+          normalizeAnswer(entry.text) === normalizeAnswer(word),
+      );
+      if (!token) return;
+      used.add(token.id);
+      map.set(token.id, step);
+    });
+    return map;
+  }, [bank, item]);
 
   if (done) {
     const total = items.length;
@@ -205,6 +221,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
       <AnimatePresence mode="wait">
         <motion.div
           key={item.id}
+          data-review-scope={item.id}
           className="flex min-h-0 flex-1 flex-col"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -217,6 +234,8 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
           >
             <button
               type="button"
+              data-review="listen"
+              data-review-listen={item.id}
               aria-label="استمع إلى الجملة"
               onClick={() => speak("sentence", item.spoken)}
               className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot ${
@@ -245,6 +264,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
                   key={token.id}
                   token={token}
                   placed
+                  reviewStep={stepById.get(token.id) ?? -1}
                   palette={palette}
                   speaking={speaking === token.id}
                   onSelect={() => {
@@ -274,6 +294,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
                     key={token.id}
                     token={token}
                     placed={false}
+                    reviewStep={stepById.get(token.id) ?? -1}
                     palette={palette}
                     speaking={speaking === token.id}
                     onSelect={() => {
@@ -303,12 +324,14 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 function WordTile({
   token,
   placed,
+  reviewStep,
   palette,
   speaking,
   onSelect,
 }: {
   token: Token;
   placed: boolean;
+  reviewStep: number;
   palette: (typeof chipColors)[keyof typeof chipColors];
   speaking: boolean;
   onSelect: () => void;
@@ -316,6 +339,9 @@ function WordTile({
   return (
     <motion.button
       type="button"
+      data-review="token"
+      data-review-step={reviewStep}
+      data-review-bank={placed ? "0" : "1"}
       layout
       layoutId={token.id}
       transition={chipMotion}

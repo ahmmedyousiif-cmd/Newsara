@@ -210,7 +210,11 @@ export function TranslateWordQuiz({
       : null;
 
   return (
-    <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]">
+    <div
+      data-review-scope={item.id}
+      data-review-locked={interactionLocked ? "1" : "0"}
+      className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]"
+    >
       <div className="relative z-[20] shrink-0 px-4 pt-4">
         <div className="flex items-center gap-2 py-2" dir="rtl">
           <Link
@@ -283,6 +287,8 @@ export function TranslateWordQuiz({
                   }}
                   dir="ltr"
                   placeholder="Type in English…"
+                  data-review="typed"
+                  data-review-answer={item.mode === "text-input" ? item.answer : ""}
                   aria-label="اكتب الترجمة بالإنجليزي"
                   className="w-full touch-manipulation rounded-2xl border-2 border-b-4 border-card-border bg-card px-12 py-3.5 text-center text-xl font-extrabold text-black outline-none transition-[border-color,box-shadow,background-color] duration-150 ease-out placeholder:text-base placeholder:font-bold placeholder:text-slate-400 focus:border-[#1CB0F6] focus:bg-[#DDF4FF]/40 focus:shadow-[0_0_0_3px_rgba(28,176,246,0.2)] disabled:opacity-60 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#1A3A4A]/50"
                 />
@@ -330,6 +336,13 @@ export function TranslateWordQuiz({
                     text={word.text}
                     selected
                     disabled={locked}
+                    reviewStep={
+                      item.mode === "word-bank"
+                        ? item.answerWords.findIndex(
+                            (part) => normalizeAnswer(part) === normalizeAnswer(word.text),
+                          )
+                        : -1
+                    }
                     onTap={() => handleDeselectBankWord(word)}
                   />
                 ))}
@@ -350,6 +363,10 @@ export function TranslateWordQuiz({
                       key={opt.id}
                       type="button"
                       role="option"
+                      data-review="choice"
+                      data-review-correct={
+                        item.mode === "vertical-choice" && opt.id === item.correctId ? "1" : "0"
+                      }
                       aria-selected={selected}
                       disabled={locked}
                       onClick={() => handleSelectVertical(opt.id)}
@@ -384,6 +401,12 @@ export function TranslateWordQuiz({
                     />
                   );
                 }
+                const step =
+                  item.mode === "word-bank"
+                    ? item.answerWords.findIndex(
+                        (part) => normalizeAnswer(part) === normalizeAnswer(word.text),
+                      )
+                    : -1;
                 return (
                   <WordChip
                     key={word.id}
@@ -391,6 +414,8 @@ export function TranslateWordQuiz({
                     text={word.text}
                     selected={pressFlashId === word.id}
                     disabled={locked}
+                    reviewStep={step}
+                    reviewBank
                     onTap={() => handleSelectBankWord(word)}
                   />
                 );
@@ -403,6 +428,7 @@ export function TranslateWordQuiz({
           <div className="relative z-[30] mt-auto shrink-0 pb-2 pt-3">
             <button
               type="button"
+              data-review="check"
               disabled={!canCheck}
               onClick={handleCheck}
               className={`flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#58CC02] text-lg font-extrabold text-white transition-[opacity,transform,filter] duration-200 ease-out active:scale-[0.98] ${

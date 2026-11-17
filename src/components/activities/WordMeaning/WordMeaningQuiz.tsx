@@ -152,7 +152,11 @@ export function WordMeaningQuiz({
       : null;
 
   return (
-    <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]">
+    <div
+      data-review-scope={item.id}
+      data-review-locked={interactionLocked ? "1" : "0"}
+      className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]"
+    >
       <LessonTopBar
         progress={progress}
         showDictation={pairs.length > 0}
@@ -174,6 +178,8 @@ export function WordMeaningQuiz({
             </p>
             <button
               type="button"
+              data-review="listen"
+              data-review-listen={item.id}
               aria-label="استمع إلى الكلمة"
               onClick={() => {
                 void PremiumTTSManager.playWord(item.promptEn);
@@ -224,6 +230,8 @@ export function WordMeaningQuiz({
                       key={option.id}
                       type="button"
                       role="option"
+                      data-review="choice"
+                      data-review-correct={option.id === item.correctId ? "1" : "0"}
                       aria-selected={selected}
                       disabled={locked || selected}
                       onClick={() => {
@@ -257,6 +265,8 @@ export function WordMeaningQuiz({
                     key={option.id}
                     type="button"
                     role="option"
+                    data-review="choice"
+                    data-review-correct={option.id === item.correctId ? "1" : "0"}
                     aria-selected={selected}
                     disabled={locked}
                     onClick={() => {
@@ -289,6 +299,8 @@ export function WordMeaningQuiz({
               }}
               dir="rtl"
               placeholder="اكتب المعنى"
+              data-review="typed"
+              data-review-answer={item.answerAr}
               aria-label="اكتب معنى الكلمة بالعربية"
               className="w-full max-w-sm touch-manipulation rounded-2xl border-2 border-b-4 border-card-border bg-card px-4 py-3.5 text-center text-2xl font-extrabold text-black outline-none placeholder:text-base placeholder:font-bold placeholder:text-slate-400 focus:border-[#1CB0F6] disabled:opacity-60 dark:text-white dark:placeholder:text-slate-500"
             />
@@ -299,6 +311,7 @@ export function WordMeaningQuiz({
           <div className="relative z-[30] mt-auto shrink-0 pb-2 pt-3">
             <button
               type="button"
+              data-review="check"
               disabled={!canCheck}
               onClick={handleCheck}
               className={`flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#58CC02] text-lg font-extrabold text-white transition-[opacity,transform,filter] duration-200 ease-out active:scale-[0.98] ${

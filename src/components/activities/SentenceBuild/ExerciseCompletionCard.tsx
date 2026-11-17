@@ -47,6 +47,7 @@ export function ExerciseCompletionCard({
   return (
     <div
       dir="rtl"
+      data-review="done"
       className="mx-auto flex h-full min-h-full w-full max-w-md flex-col justify-center bg-cream-soft px-4 py-6 dark:bg-[#131F24]"
     >
       <motion.div
@@ -78,6 +79,7 @@ export function ExerciseCompletionCard({
         </dl>
         <button
           type="button"
+          data-review="retry"
           onClick={onRetry}
           className="mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl bg-apricot text-base font-extrabold text-white transition-transform active:scale-95"
         >

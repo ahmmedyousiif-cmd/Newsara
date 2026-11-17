@@ -252,6 +252,13 @@ class PremiumTTSManagerImpl {
     this.stopBrowserSpeech();
   }
 
+  /** True while premium audio or the device voice is still playing. */
+  isBusy(): boolean {
+    if (typeof window === "undefined") return false;
+    const speaking = Boolean(window.speechSynthesis?.speaking || window.speechSynthesis?.pending);
+    return speaking || this.currentSource !== null;
+  }
+
   clearCache(): void {
     this.cache.clear();
   }

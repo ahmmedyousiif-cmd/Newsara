@@ -74,6 +74,7 @@ export function FeedbackSheet({
 
         <button
           type="button"
+          data-review="continue"
           onClick={onContinue}
           className={`mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl text-lg font-extrabold shadow-md transition-transform duration-200 active:scale-[0.98] ${copy.button}`}
         >
