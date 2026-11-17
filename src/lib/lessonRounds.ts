@@ -1,5 +1,5 @@
 import type { MatchingPair } from "@/types/matching";
-import type { WordMeaningItem } from "@/types/meaning";
+import type { DictationItem, WordMeaningItem } from "@/types/meaning";
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -21,22 +21,30 @@ function shuffle<T>(list: T[], rand: () => number): T[] {
   return next;
 }
 
+/** Five lesson words, shifting forward each time the optional drill is opened. */
+export function takeRotatingDictation(
+  pairs: MatchingPair[],
+  start: number,
+  count = 5,
+): DictationItem[] {
+  if (pairs.length === 0) return [];
+  const size = Math.min(count, pairs.length);
+  const origin = ((start % pairs.length) + pairs.length) % pairs.length;
+  return Array.from({ length: size }, (_, index) => {
+    const word = pairs[(origin + index) % pairs.length]!;
+    return {
+      id: `dict-${origin}-${word.pairId}`,
+      promptAr: word.ar,
+      answerEn: word.en,
+    };
+  });
+}
+
 export function buildLessonRounds(pairs: MatchingPair[], seed: number) {
   const rand = mulberry32(seed || 1);
   const words = shuffle(pairs, rand);
-  const choiceFirst = rand() < 0.5;
 
-  const meaning: WordMeaningItem[] = words.map((word, index) => {
-    const useChoice = index % 2 === 0 ? choiceFirst : !choiceFirst;
-    if (!useChoice) {
-      return {
-        id: `type-${word.pairId}`,
-        mode: "type" as const,
-        promptEn: word.en,
-        answerAr: word.ar,
-      };
-    }
-
+  const meaning: WordMeaningItem[] = words.map((word) => {
     const distractors = shuffle(
       words.filter((other) => other.pairId !== word.pairId),
       rand,

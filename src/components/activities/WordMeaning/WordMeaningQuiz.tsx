@@ -8,12 +8,13 @@ import {
   playWrongSound,
 } from "@/lib/sounds";
 import { gradeTypedAnswer } from "@/lib/typo";
-import { shuffleCards } from "@/types/matching";
-import type { WordMeaningItem } from "@/types/meaning";
+import { takeRotatingDictation } from "@/lib/lessonRounds";
+import { shuffleCards, type MatchingPair } from "@/types/matching";
+import type { DictationItem, WordMeaningItem } from "@/types/meaning";
 import type { InteractionState } from "@/types/translate";
 import { PremiumTTSManager } from "@/utils/PremiumTTSManager";
+import { DictationQuiz } from "./DictationQuiz";
 import { LessonTopBar } from "./LessonTopBar";
-import { OptionalDictationSheet } from "./OptionalDictationSheet";
 
 type WordMeaningQuizProps = {
   instruction: string;
@@ -21,6 +22,9 @@ type WordMeaningQuizProps = {
   progress: number;
   isFinalItem?: boolean;
   interactionLocked?: boolean;
+  pairs?: MatchingPair[];
+  dictationStart?: number;
+  onDictationStarted?: () => void;
   onResult?: (correct: boolean) => void;
   onContinue: () => void;
 };
@@ -31,6 +35,9 @@ export function WordMeaningQuiz({
   progress,
   isFinalItem = false,
   interactionLocked = false,
+  pairs = [],
+  dictationStart = 0,
+  onDictationStarted,
   onResult,
   onContinue,
 }: WordMeaningQuizProps) {
@@ -38,7 +45,10 @@ export function WordMeaningQuiz({
     useState<InteractionState>("IDLE");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
-  const [practiceOpen, setPracticeOpen] = useState(false);
+  const [dictationItems, setDictationItems] = useState<DictationItem[] | null>(
+    null,
+  );
+  const [dictationIndex, setDictationIndex] = useState(0);
   const scoredRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +69,8 @@ export function WordMeaningQuiz({
     setInteractionState("IDLE");
     setSelectedId(null);
     setTyped("");
-    setPracticeOpen(false);
+    setDictationItems(null);
+    setDictationIndex(0);
   }, [item]);
 
   useEffect(() => {
@@ -75,12 +86,6 @@ export function WordMeaningQuiz({
     const timer = window.setTimeout(() => inputRef.current?.focus(), 320);
     return () => window.clearTimeout(timer);
   }, [item, locked]);
-
-  const practiceArabic =
-    item.mode === "type"
-      ? item.answerAr
-      : (item.options.find((option) => option.id === item.correctId)?.text ??
-        "");
 
   const correctText = item.mode === "choice"
     ? (item.options.find((option) => option.id === item.correctId)?.text ??
@@ -125,6 +130,20 @@ export function WordMeaningQuiz({
     onContinue();
   };
 
+  const startDictation = () => {
+    if (locked || dictationItems) return;
+    const items = takeRotatingDictation(pairs, dictationStart, 5);
+    if (items.length === 0) return;
+    setDictationIndex(0);
+    setDictationItems(items);
+    onDictationStarted?.();
+  };
+
+  const closeDictation = () => {
+    setDictationItems(null);
+    setDictationIndex(0);
+  };
+
   const feedbackState =
     interactionState === "SUCCESS" ||
     interactionState === "TYPO" ||
@@ -136,10 +155,8 @@ export function WordMeaningQuiz({
     <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]">
       <LessonTopBar
         progress={progress}
-        showDictation
-        onStartDictation={
-          locked ? undefined : () => setPracticeOpen(true)
-        }
+        showDictation={pairs.length > 0}
+        onStartDictation={startDictation}
       />
 
       <div className="relative z-[10] flex min-h-0 flex-1 flex-col px-4 pb-4">
@@ -152,15 +169,9 @@ export function WordMeaningQuiz({
 
         <div className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-2">
           <div dir="ltr" className="flex items-center justify-center gap-2">
-            <button
-              type="button"
-              disabled={locked}
-              aria-label={`تدريب إملاء اختياري لكلمة ${item.promptEn}`}
-              onClick={() => setPracticeOpen(true)}
-              className="text-center text-4xl font-extrabold tracking-tight text-black transition-transform active:scale-95 disabled:opacity-100 sm:text-5xl dark:text-white"
-            >
+            <p className="text-center text-4xl font-extrabold tracking-tight text-black sm:text-5xl dark:text-white">
               {item.promptEn}
-            </button>
+            </p>
             <button
               type="button"
               aria-label="استمع إلى الكلمة"
@@ -180,10 +191,6 @@ export function WordMeaningQuiz({
               </svg>
             </button>
           </div>
-          <p dir="rtl" className="-mt-3 text-center text-xs font-bold text-slate-500">
-            اضغط الكلمة إذا تريد الإملاء، وهو اختياري
-          </p>
-
           {item.mode === "choice" ? (
             <div
               dir="rtl"
@@ -256,12 +263,23 @@ export function WordMeaningQuiz({
         )}
       </div>
 
-      {practiceOpen && practiceArabic ? (
-        <OptionalDictationSheet
-          promptAr={practiceArabic}
-          answerEn={item.promptEn}
-          onClose={() => setPracticeOpen(false)}
-        />
+      {dictationItems ? (
+        <div className="absolute inset-0 z-50 bg-cream-soft dark:bg-[#131F24]">
+          <DictationQuiz
+            key={dictationItems[dictationIndex]!.id}
+            item={dictationItems[dictationIndex]!}
+            progress={progress}
+            interactionLocked={interactionLocked}
+            onExit={closeDictation}
+            onContinue={() => {
+              if (dictationIndex + 1 >= dictationItems.length) {
+                closeDictation();
+                return;
+              }
+              setDictationIndex((current) => current + 1);
+            }}
+          />
+        </div>
       ) : null}
 
       {feedbackState ? (

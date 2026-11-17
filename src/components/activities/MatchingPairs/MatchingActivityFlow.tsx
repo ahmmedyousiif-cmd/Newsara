@@ -55,6 +55,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     [sets],
   );
   const [roundSeed, setRoundSeed] = useState(1);
+  const [dictationStart, setDictationStart] = useState(0);
   const rounds = useMemo(
     () => buildLessonRounds(pairs, roundSeed),
     [pairs, roundSeed],
@@ -222,6 +223,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     setRewardDate(formatArabicDate());
     setBoardSeed(`${Date.now()}-${Math.random()}`);
     setRoundSeed(Date.now());
+    setDictationStart(0);
     setOutgoingExiting(false);
     setIncomingActive(false);
     setCurrentIndex(0);
@@ -297,6 +299,11 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 item={meaningItem}
                 progress={lessonProgress}
                 isFinalItem={index === rewardIndex - 1}
+                pairs={pairs}
+                dictationStart={dictationStart}
+                onDictationStarted={() =>
+                  setDictationStart((start) => start + 5)
+                }
                 interactionLocked={isTransitioning || showingReward}
                 onResult={
                   index === currentIndex && !isTransitioning

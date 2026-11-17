@@ -10,6 +10,7 @@ import {
 import { gradeTypedAnswer } from "@/lib/typo";
 import type { DictationItem } from "@/types/meaning";
 import type { InteractionState } from "@/types/translate";
+import { PremiumTTSManager } from "@/utils/PremiumTTSManager";
 import { LessonTopBar } from "./LessonTopBar";
 
 type DictationQuizProps = {
@@ -19,6 +20,7 @@ type DictationQuizProps = {
   interactionLocked?: boolean;
   onResult?: (correct: boolean) => void;
   onContinue: () => void;
+  onExit?: () => void;
 };
 
 export function DictationQuiz({
@@ -28,6 +30,7 @@ export function DictationQuiz({
   interactionLocked = false,
   onResult,
   onContinue,
+  onExit,
 }: DictationQuizProps) {
   const [interactionState, setInteractionState] =
     useState<InteractionState>("IDLE");
@@ -63,6 +66,7 @@ export function DictationQuiz({
       grade === "correct" ? "SUCCESS" : grade === "typo" ? "TYPO" : "ERROR";
     scoredRef.current = true;
     const correct = next === "SUCCESS" || next === "TYPO";
+    void PremiumTTSManager.playWord(item.answerEn);
     if (correct) {
       if (isFinalItem) playFinaleSound();
       else playSuccessSound();
@@ -93,7 +97,12 @@ export function DictationQuiz({
 
   return (
     <div className="relative mx-auto flex h-full min-h-full w-full max-w-md flex-col overflow-hidden bg-cream-soft select-none dark:bg-[#131F24]">
-      <LessonTopBar progress={progress} showDictation dictationActive />
+      <LessonTopBar
+        progress={progress}
+        showDictation
+        dictationActive
+        onStartDictation={onExit}
+      />
 
       <div className="relative z-[10] flex min-h-0 flex-1 flex-col px-4 pb-4">
         <h2
@@ -106,7 +115,7 @@ export function DictationQuiz({
         <div className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-4">
           <p
             dir="rtl"
-            className="text-center text-5xl font-extrabold text-black dark:text-white"
+            className="text-center text-2xl font-extrabold text-black dark:text-white"
           >
             {item.promptAr}
           </p>

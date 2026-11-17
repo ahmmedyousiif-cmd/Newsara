@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 type LessonTopBarProps = {
@@ -17,8 +16,6 @@ export function LessonTopBar({
   dictationActive = false,
   onStartDictation,
 }: LessonTopBarProps) {
-  const [open, setOpen] = useState(false);
-
   return (
     <div className="relative z-[20] shrink-0 px-4 pt-4">
       <div className="flex items-center gap-2 py-2" dir="rtl">
@@ -46,10 +43,9 @@ export function LessonTopBar({
         {showDictation ? (
           <button
             type="button"
-            aria-expanded={open}
-            aria-haspopup="menu"
-            onClick={() => setOpen((value) => !value)}
-            className={`flex h-11 shrink-0 items-center gap-1 rounded-full border px-2.5 text-xs font-extrabold transition-transform active:scale-95 ${
+            onClick={onStartDictation}
+            aria-label={dictationActive ? "رجوع من الإملاء" : "تدريب إملاء اختياري"}
+            className={`flex h-12 shrink-0 items-center gap-1 rounded-full border px-2.5 text-[11px] font-extrabold transition-transform active:scale-95 ${
               dictationActive
                 ? "border-apricot bg-apricot text-white"
                 : "border-card-border bg-card text-apricot-deep dark:text-apricot"
@@ -69,38 +65,10 @@ export function LessonTopBar({
                 strokeLinecap="round"
               />
             </svg>
-            الإملاء
+            {dictationActive ? "رجوع" : "الإملاء"}
           </button>
         ) : null}
       </div>
-
-      {showDictation && open ? (
-        <div
-          dir="rtl"
-          role="menu"
-          className="absolute inset-x-4 top-[4.25rem] z-30 rounded-2xl border border-[#EDD9BC] bg-card p-3 text-right shadow-md dark:border-white/10"
-        >
-          <p className="text-sm font-extrabold text-slate-900 dark:text-white">
-            الإملاء
-          </p>
-          <p className="mt-1 text-sm font-bold leading-6 text-slate-600 dark:text-slate-300">
-            اختياري. اضغط الكلمة إذا تريد تتدرّب على كتابتها.
-          </p>
-          {dictationActive ? null : (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                onStartDictation?.();
-              }}
-              className="mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl bg-apricot text-sm font-extrabold text-white transition-transform active:scale-95"
-            >
-              تدرّب على هذه الكلمة
-            </button>
-          )}
-        </div>
-      ) : null}
     </div>
   );
 }
