@@ -23,7 +23,9 @@ export type RewardScreenProps = {
     timeInSeconds: number;
     date: string;
   };
-  onContinue: () => void;
+  onRetry: () => void;
+  onNextLesson: () => void;
+  nextLessonReady?: boolean;
 };
 
 function formatTime(totalSeconds: number) {
@@ -56,7 +58,9 @@ export function RewardScreen({
   studentName = "علي حسن",
   avatarUrl = "/anime-student.png",
   stats,
-  onContinue,
+  onRetry,
+  onNextLesson,
+  nextLessonReady = false,
 }: RewardScreenProps) {
   const level = useMemo(
     () => getPerformanceLevel(stats.correctAnswers, stats.totalQuestions),
@@ -66,9 +70,14 @@ export function RewardScreen({
   const title = useMemo(() => pickMotivationalTitle(level), [level]);
   const narrative = useMemo(() => pickPedagogicalNarrative(level), [level]);
 
-  const handleContinue = () => {
+  const handleRetry = () => {
     playCorrectClick();
-    onContinue();
+    onRetry();
+  };
+
+  const handleNextLesson = () => {
+    playCorrectClick();
+    onNextLesson();
   };
 
   return (
@@ -203,13 +212,22 @@ export function RewardScreen({
       </div>
 
       <div className="shrink-0 border-t border-black/5 bg-cream-soft px-3 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] dark:border-white/10 dark:bg-[#131F24]">
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="mx-auto flex min-h-11 w-full max-w-md items-center justify-center rounded-full bg-apricot text-sm font-extrabold text-white transition-transform duration-200 active:scale-95 dark:bg-apricot-deep"
-        >
-          متابعة
-        </button>
+        <div className="mx-auto flex w-full max-w-md flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="flex min-h-11 w-full items-center justify-center rounded-full bg-apricot text-sm font-extrabold text-white transition-transform duration-200 active:scale-95 dark:bg-apricot-deep"
+          >
+            إعادة التمرين
+          </button>
+          <button
+            type="button"
+            onClick={handleNextLesson}
+            className="flex min-h-11 w-full items-center justify-center rounded-full border-2 border-[#EDD9BC] bg-card text-sm font-extrabold text-slate-800 transition-transform duration-200 active:scale-95 dark:border-white/15 dark:bg-[#1F2E35] dark:text-white"
+          >
+            {nextLessonReady ? "الدرس التالي" : "الدرس التالي · قريباً"}
+          </button>
+        </div>
       </div>
     </div>
   );

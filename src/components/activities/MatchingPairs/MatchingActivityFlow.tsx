@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MatchingPairsContainer } from "./MatchingPairsContainer";
-import { TranslateWordQuiz } from "@/components/activities/TranslateWord/TranslateWordQuiz";
+import { DictationQuiz } from "@/components/activities/WordMeaning/DictationQuiz";
 import { WordMeaningQuiz } from "@/components/activities/WordMeaning/WordMeaningQuiz";
 import { RewardScreen } from "@/components/reward/RewardScreen";
 import {
@@ -12,21 +12,16 @@ import {
   playFinaleSound,
   vibrateMatchingComplete,
 } from "@/lib/sounds";
+import { buildLessonRounds } from "@/lib/lessonRounds";
 import { formatArabicDate } from "@/lib/rewardCopy";
-import { getActivitySets, type MatchingActivity } from "@/types/matching";
-import type { WordMeaningActivity } from "@/types/meaning";
-import type { TranslateActivity } from "@/types/translate";
+import { getActivitySets, type MatchingActivity, type MatchingPair } from "@/types/matching";
 import lessonsJson from "../../../../content/curriculum/lessons.json";
-import meaningJson from "../../../../content/activities/word-meaning.json";
-import translateJson from "../../../../content/activities/translate-vocab.json";
 
 type MatchingActivityFlowProps = {
   activity: MatchingActivity;
 };
 
 const SLIDE_MS = 1100;
-const translateActivity = translateJson as TranslateActivity;
-const meaningActivity = meaningJson as WordMeaningActivity;
 
 const lessonMeta = (() => {
   const data = lessonsJson as {
@@ -36,13 +31,16 @@ const lessonMeta = (() => {
       title: string;
       titleAr: string;
       href: string | null;
+      unlocked: boolean;
     }>;
   };
   const lesson = data.lessons.find((l) => l.number === 1) ?? data.lessons[0];
+  const next = data.lessons.find((l) => l.number === (lesson?.number ?? 1) + 1);
   return {
     unitLabel: data.unitTitle,
     lessonLabel: lesson ? `Lesson ${lesson.number}` : "Lesson 1",
     lessonName: lesson?.titleAr ?? activityFallbackTitle(),
+    nextHref: next?.unlocked && next.href ? next.href : null,
   };
 })();
 
@@ -53,19 +51,26 @@ function activityFallbackTitle() {
 export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const router = useRouter();
   const sets = useMemo(() => getActivitySets(activity), [activity]);
-  const meaningItems = meaningActivity.items;
-  const quizItems = translateActivity.items;
-  const meaningStart = sets.length;
-  const translateStart = meaningStart + meaningItems.length;
-  const rewardIndex = translateStart + quizItems.length;
-  const totalPairs = useMemo(
-    () => sets.reduce((sum, set) => sum + set.pairs.length, 0),
+  const pairs = useMemo<MatchingPair[]>(
+    () => sets.flatMap((set) => set.pairs),
     [sets],
   );
+  const [roundSeed, setRoundSeed] = useState(1);
+  const rounds = useMemo(
+    () => buildLessonRounds(pairs, roundSeed),
+    [pairs, roundSeed],
+  );
+  const meaningItems = rounds.meaning;
+  const dictationItems = rounds.dictation;
+  const meaningStart = sets.length;
+  const dictationStart = meaningStart + meaningItems.length;
+  const rewardIndex = dictationStart + dictationItems.length;
+  const totalPairs = pairs.length;
   const totalQuestions =
-    totalPairs + meaningItems.length + quizItems.length;
+    totalPairs + meaningItems.length + dictationItems.length;
 
   const [boardSeed, setBoardSeed] = useState("board");
+  const [skippedMeaning, setSkippedMeaning] = useState(0);
   const [stage, setStage] = useState<number[]>([0]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [outgoingExiting, setOutgoingExiting] = useState(false);
@@ -92,11 +97,11 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const showingReward = currentIndex >= rewardIndex && !isTransitioning;
 
   const lessonProgress = useMemo(() => {
-    const total = Math.max(1, totalQuestions);
+    const total = Math.max(1, totalQuestions - skippedMeaning);
     return Math.round(
       (Math.min(completedUnits, total) / total) * 100,
     );
-  }, [completedUnits, totalQuestions]);
+  }, [completedUnits, skippedMeaning, totalQuestions]);
 
   const bumpCombo = useCallback(() => {
     comboCurrentRef.current += 1;
@@ -181,8 +186,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
       const nextStage =
         meaningItems.length > 0
           ? meaningStart
-          : quizItems.length > 0
-            ? translateStart
+          : dictationItems.length > 0
+            ? dictationStart
             : rewardIndex;
       slideTo(nextStage);
       return;
@@ -192,13 +197,13 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     slideTo(currentIndex + 1, "continue");
   }, [
     currentIndex,
+    dictationItems.length,
+    dictationStart,
     meaningItems.length,
     meaningStart,
-    quizItems.length,
     rewardIndex,
     sets.length,
     slideTo,
-    translateStart,
   ]);
 
   const handleQuizContinue = useCallback(() => {
@@ -217,6 +222,36 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     slideTo(next, "none");
   }, [currentIndex, rewardIndex, slideTo]);
 
+  const handleStartDictation = useCallback(() => {
+    if (lockRef.current || currentIndex >= dictationStart) return;
+    const remaining = Math.max(0, dictationStart - currentIndex);
+    setSkippedMeaning(remaining);
+    slideTo(dictationStart, "none");
+  }, [currentIndex, dictationStart, slideTo]);
+
+  const handleRetry = useCallback(() => {
+    lockRef.current = false;
+    finalePlayedRef.current = false;
+    comboCurrentRef.current = 0;
+    startedAtRef.current = Date.now();
+    setCorrectCount(0);
+    setCompletedUnits(0);
+    setComboStreak(0);
+    setSkippedMeaning(0);
+    setElapsedSeconds(0);
+    setRewardDate(formatArabicDate());
+    setBoardSeed(`${Date.now()}-${Math.random()}`);
+    setRoundSeed(Date.now());
+    setOutgoingExiting(false);
+    setIncomingActive(false);
+    setCurrentIndex(0);
+    setStage([0]);
+  }, []);
+
+  const handleNextLesson = useCallback(() => {
+    router.push(lessonMeta.nextHref ?? "/");
+  }, [router]);
+
   if (!sets.length) {
     return (
       <div className="flex min-h-full items-center justify-center text-slate-500">
@@ -229,8 +264,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     <div className="groups-wrapper relative bg-cream-soft dark:bg-[#131F24]">
       {stage.map((index) => {
         const isReward = index >= rewardIndex;
-        const isTranslate = !isReward && index >= translateStart;
-        const isMeaning = !isReward && !isTranslate && index >= meaningStart;
+        const isDictation = !isReward && index >= dictationStart;
+        const isMeaning = !isReward && !isDictation && index >= meaningStart;
         const isOutgoing = index === currentIndex && isTransitioning;
         const isIncoming = index !== currentIndex && isTransitioning;
         const isSolo = !isTransitioning;
@@ -243,13 +278,13 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
         else if (isSolo) blockClass = "group-active";
 
         const meaningItem = meaningItems[index - meaningStart];
-        const quizItem = quizItems[index - translateStart];
+        const dictationItem = dictationItems[index - dictationStart];
         const blockKey = isReward
           ? "reward"
-          : isTranslate
-            ? quizItem?.id ?? `quiz-${index}`
+          : isDictation
+            ? `${dictationItem?.id ?? `spell-${index}`}-${roundSeed}`
             : isMeaning
-              ? meaningItem?.id ?? `meaning-${index}`
+              ? `${meaningItem?.id ?? `meaning-${index}`}-${roundSeed}`
               : sets[index]?.id;
 
         return (
@@ -270,21 +305,28 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 avatarUrl="/anime-student.png"
                 stats={{
                   correctAnswers: correctCount,
-                  totalQuestions,
+                  totalQuestions: Math.max(1, totalQuestions - skippedMeaning),
                   comboStreak,
                   timeInSeconds: elapsedSeconds,
                   date: rewardDate,
                 }}
-                onContinue={() => router.push("/")}
+                nextLessonReady={Boolean(lessonMeta.nextHref)}
+                onRetry={handleRetry}
+                onNextLesson={handleNextLesson}
               />
             ) : isMeaning && meaningItem ? (
               <WordMeaningQuiz
-                key={meaningItem.id}
-                instruction={meaningActivity.instruction}
+                key={`${meaningItem.id}-${roundSeed}`}
+                instruction="ما معنى الكلمة"
                 item={meaningItem}
                 progress={lessonProgress}
                 isFinalItem={index === rewardIndex - 1}
                 interactionLocked={isTransitioning || showingReward}
+                onStartDictation={
+                  index === currentIndex && !isTransitioning
+                    ? handleStartDictation
+                    : undefined
+                }
                 onResult={
                   index === currentIndex && !isTransitioning
                     ? handleQuizResult
@@ -296,11 +338,10 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                     : () => {}
                 }
               />
-            ) : isTranslate && quizItem ? (
-              <TranslateWordQuiz
-                key={quizItem.id}
-                instruction={translateActivity.instruction}
-                item={quizItem}
+            ) : isDictation && dictationItem ? (
+              <DictationQuiz
+                key={`${dictationItem.id}-${roundSeed}`}
+                item={dictationItem}
                 progress={lessonProgress}
                 isFinalItem={index === rewardIndex - 1}
                 interactionLocked={isTransitioning || showingReward}
