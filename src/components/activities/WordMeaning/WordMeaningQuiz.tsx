@@ -194,12 +194,15 @@ export function WordMeaningQuiz({
           {item.mode === "choice" ? (
             <div
               dir="rtl"
-              className="flex w-full max-w-sm flex-col gap-3"
+              className={`flex w-full max-w-sm gap-3 ${
+                item.layout === "horizontal" ? "flex-row" : "flex-col"
+              }`}
               role="listbox"
               aria-label="اختر معنى الكلمة"
             >
               {options.map((option) => {
                 const selected = selectedId === option.id;
+                const horizontal = item.layout === "horizontal";
                 return (
                   <button
                     key={option.id}
@@ -213,7 +216,11 @@ export function WordMeaningQuiz({
                         prev === option.id ? null : option.id,
                       );
                     }}
-                    className={`flex min-h-14 w-full touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-4 text-2xl font-extrabold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed ${
+                    className={`flex min-h-14 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 font-extrabold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed ${
+                      horizontal
+                        ? "min-w-0 flex-1 px-1 text-base leading-5"
+                        : "w-full px-4 text-2xl"
+                    } ${
                       selected
                         ? "border-[#1CB0F6] bg-[#DDF4FF] text-black shadow-[0_0_0_2px_rgba(28,176,246,0.28)] dark:border-[#1CB0F6] dark:bg-[#1A3A4A] dark:text-white"
                         : "border-card-border bg-card text-black hover:border-apricot/60 dark:text-white dark:hover:bg-[#25373F]"

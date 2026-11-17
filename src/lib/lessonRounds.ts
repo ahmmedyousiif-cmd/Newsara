@@ -44,7 +44,7 @@ export function buildLessonRounds(pairs: MatchingPair[], seed: number) {
   const rand = mulberry32(seed || 1);
   const words = shuffle(pairs, rand);
 
-  const meaning: WordMeaningItem[] = words.map((word) => {
+  const meaning: WordMeaningItem[] = words.slice(0, 5).map((word, index) => {
     const distractors = shuffle(
       words.filter((other) => other.pairId !== word.pairId),
       rand,
@@ -59,6 +59,7 @@ export function buildLessonRounds(pairs: MatchingPair[], seed: number) {
       mode: "choice" as const,
       promptEn: word.en,
       correctId: word.pairId,
+      layout: index < 3 ? "vertical" : "horizontal",
       options,
     };
   });

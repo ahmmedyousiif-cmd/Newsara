@@ -10,6 +10,8 @@ export type WordMeaningChoiceItem = {
   promptEn: string;
   options: MeaningOption[];
   correctId: string;
+  /** First questions stack options; the last two sit side by side. */
+  layout?: "vertical" | "horizontal";
 };
 
 /** English word shown, learner types the Arabic meaning. */
