@@ -164,6 +164,21 @@ body {
   animation: slide-up 280ms ease-out;
 }
 
+@keyframes word-rise {
+  from {
+    opacity: 0.35;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-word-rise {
+  animation: word-rise 260ms ease-out;
+}
+
 /* Journey path: document scrolls. Do NOT set overflow-x:hidden here —
    CSS turns that into overflow-y:auto and steals mouse-wheel / touch. */
 .learning-journey-viewport {

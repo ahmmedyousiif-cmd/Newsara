@@ -184,6 +184,38 @@ class PremiumTTSManagerImpl {
     }
   }
 
+  /** Speak an Arabic choice with the device voice. */
+  playArabic(text: string): void {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const spoken = text.trim();
+    if (!spoken) return;
+
+    this.playGeneration += 1;
+    this.stopCurrent();
+    this.stopBrowserSpeech();
+    this.ensureBrowserVoices();
+
+    const utterance = new SpeechSynthesisUtterance(spoken);
+    utterance.lang = "ar-SA";
+    utterance.rate = 0.9;
+    utterance.volume = 1;
+    const voice = this.browserVoices.find((item) =>
+      item.lang.toLowerCase().startsWith("ar"),
+    );
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang || "ar-SA";
+    }
+
+    window.setTimeout(() => {
+      try {
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        /* ignore */
+      }
+    }, 0);
+  }
+
   async playWord(word: string, options: PlayOptions = {}): Promise<void> {
     if (typeof window === "undefined") return;
     const text = word.trim();

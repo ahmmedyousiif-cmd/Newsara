@@ -191,18 +191,67 @@ export function WordMeaningQuiz({
               </svg>
             </button>
           </div>
-          {item.mode === "choice" ? (
+          {item.mode === "choice" && item.layout === "horizontal" ? (
+            <div className="flex min-h-0 w-full max-w-sm flex-1 flex-col">
+              <div
+                dir="rtl"
+                className="flex min-h-16 w-full items-center justify-center rounded-2xl border-2 border-dashed border-[#EDD9BC] bg-card px-4 dark:border-white/15"
+              >
+                {selectedId ? (
+                  <button
+                    type="button"
+                    disabled={locked}
+                    onClick={() => {
+                      if (locked) return;
+                      setSelectedId(null);
+                    }}
+                    className="animate-word-rise text-2xl font-extrabold text-black active:scale-95 dark:text-white"
+                  >
+                    {options.find((option) => option.id === selectedId)?.text}
+                  </button>
+                ) : null}
+              </div>
+              <div
+                dir="rtl"
+                className="mt-auto flex w-full gap-3 pt-6"
+                role="listbox"
+                aria-label="اختر معنى الكلمة"
+              >
+                {options.map((option) => {
+                  const selected = selectedId === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      disabled={locked || selected}
+                      onClick={() => {
+                        if (locked) return;
+                        setSelectedId(option.id);
+                        PremiumTTSManager.playArabic(option.text);
+                      }}
+                      className={`flex min-h-14 min-w-0 flex-1 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-1 text-base font-extrabold leading-5 transition-[transform,background-color,border-color,opacity] duration-200 ease-out active:scale-95 disabled:cursor-not-allowed ${
+                        selected
+                          ? "border-dashed border-[#EDD9BC] bg-transparent text-transparent shadow-none dark:border-white/15"
+                          : "border-card-border bg-card text-black dark:text-white"
+                      }`}
+                    >
+                      {option.text}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : item.mode === "choice" ? (
             <div
               dir="rtl"
-              className={`flex w-full max-w-sm gap-3 ${
-                item.layout === "horizontal" ? "flex-row" : "flex-col"
-              }`}
+              className="flex w-full max-w-sm flex-col gap-3"
               role="listbox"
               aria-label="اختر معنى الكلمة"
             >
               {options.map((option) => {
                 const selected = selectedId === option.id;
-                const horizontal = item.layout === "horizontal";
                 return (
                   <button
                     key={option.id}
@@ -216,11 +265,7 @@ export function WordMeaningQuiz({
                         prev === option.id ? null : option.id,
                       );
                     }}
-                    className={`flex min-h-14 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 font-extrabold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed ${
-                      horizontal
-                        ? "min-w-0 flex-1 px-1 text-base leading-5"
-                        : "w-full px-4 text-2xl"
-                    } ${
+                    className={`flex min-h-14 w-full touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-4 text-2xl font-extrabold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed ${
                       selected
                         ? "border-[#1CB0F6] bg-[#DDF4FF] text-black shadow-[0_0_0_2px_rgba(28,176,246,0.28)] dark:border-[#1CB0F6] dark:bg-[#1A3A4A] dark:text-white"
                         : "border-card-border bg-card text-black hover:border-apricot/60 dark:text-white dark:hover:bg-[#25373F]"
