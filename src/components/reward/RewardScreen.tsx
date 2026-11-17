@@ -84,11 +84,11 @@ export function RewardScreen({
     <div
       dir="rtl"
       data-review="done"
-      className="flex h-full min-h-0 w-full flex-col bg-cream-soft font-[family-name:var(--font-cairo-family),Cairo,sans-serif] select-none dark:bg-[#131F24]"
+      className="stats-screen-lock flex h-dvh max-h-dvh min-h-0 w-full flex-col overflow-hidden overscroll-none bg-cream-soft font-[family-name:var(--font-cairo-family),Cairo,sans-serif] select-none touch-none dark:bg-[#131F24]"
     >
-      {/* Stats sit just above CTA; spare height stays above the block */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3">
-        <div className="mx-auto flex min-h-full w-full max-w-md flex-col justify-end">
+      {/* Stats sit just above CTA; this block does not scroll */}
+      <div className="min-h-0 flex-1 overflow-hidden overscroll-none px-3">
+        <div className="mx-auto flex h-full w-full max-w-md flex-col justify-end overflow-hidden">
           <div className="w-full space-y-2 py-2">
           <div className="text-center">
             <p className="text-[10px] font-bold tracking-wide text-apricot-deep dark:text-apricot">

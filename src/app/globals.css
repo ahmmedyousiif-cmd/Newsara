@@ -243,3 +243,23 @@ body {
   pointer-events: none;
 }
 
+/* End-of-exercise stats stay put: no pan, no scroll. Questions keep sliding. */
+.stats-screen-lock {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.stats-screen-lock * {
+  touch-action: none;
+}
+
+.group-block.stats-screen-lock {
+  transform: none;
+  transition: none;
+  will-change: auto;
+  opacity: 1;
+}
+

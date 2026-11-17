@@ -243,7 +243,11 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   }
 
   return (
-    <div className="groups-wrapper relative bg-cream-soft dark:bg-[#131F24]">
+    <div
+      className={`groups-wrapper relative bg-cream-soft dark:bg-[#131F24] ${
+        showingReward ? "stats-screen-lock" : ""
+      }`}
+    >
       {stage.map((index) => {
         const isReward = index >= rewardIndex;
         const isMeaning = !isReward && index >= meaningStart;
@@ -252,7 +256,9 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
         const isSolo = !isTransitioning;
 
         let blockClass = "group-active";
-        if (isOutgoing && outgoingExiting) blockClass = "group-exit-right";
+        if (isReward) {
+          blockClass = "stats-screen-lock";
+        } else if (isOutgoing && outgoingExiting) blockClass = "group-exit-right";
         else if (isOutgoing && !outgoingExiting) blockClass = "group-active";
         else if (isIncoming && incomingActive) blockClass = "group-active";
         else if (isIncoming && !incomingActive) blockClass = "group-enter-left";
