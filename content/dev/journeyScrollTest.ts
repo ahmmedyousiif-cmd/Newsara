@@ -111,14 +111,18 @@ export function buildJourneyStations(
 
   TEST_LOCKED_TOPICS.forEach((topic, i) => {
     const number = i + 2;
+    const officialLesson = official.find((lesson) => lesson.number === number);
+    const opened = Boolean(officialLesson?.unlocked && officialLesson.href);
     stations.push({
-      id: `journey-test-${String(number).padStart(2, "0")}`,
+      id: opened
+        ? officialLesson!.id
+        : `journey-test-${String(number).padStart(2, "0")}`,
       number,
-      title: topic.title,
-      subtitle: topic.subtitle,
-      status: "locked",
+      title: opened ? officialLesson!.title : topic.title,
+      subtitle: opened ? officialLesson!.titleAr : topic.subtitle,
+      status: opened ? "active" : "locked",
       side: SIDE_PATTERN[number - 1] ?? (number % 2 === 0 ? "right" : "left"),
-      href: null,
+      href: opened ? officialLesson!.href : null,
     });
   });
 
