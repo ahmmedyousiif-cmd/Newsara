@@ -209,10 +209,11 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
             <WordTile
               key={token.id}
               token={token}
-              speaking={false}
-              inAnswer
-              onSelect={() => removeToken(token.id)}
-              onSpeak={() => {}}
+              speaking={speaking === token.id}
+              onSelect={() => {
+                speak(token.id, spokenWord(token.text));
+                removeToken(token.id);
+              }}
             />
           ))}
         </div>
@@ -236,8 +237,10 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
                 key={token.id}
                 token={token}
                 speaking={speaking === token.id}
-                onSelect={() => addToken(token.id)}
-                onSpeak={() => speak(token.id, spokenWord(token.text))}
+                onSelect={() => {
+                  speak(token.id, spokenWord(token.text));
+                  addToken(token.id);
+                }}
               />
             );
           })}
@@ -250,46 +253,27 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 function WordTile({
   token,
   speaking,
-  inAnswer = false,
   onSelect,
-  onSpeak,
 }: {
   token: Token;
   speaking: boolean;
-  inAnswer?: boolean;
   onSelect: () => void;
-  onSpeak: () => void;
 }) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       layout
       layoutId={token.id}
       transition={chipMotion}
-      className={`inline-flex items-stretch overflow-hidden rounded-2xl border-2 border-b-4 bg-card shadow-sm ${
-        speaking
-          ? "border-apricot"
-          : "border-card-border"
+      onClick={onSelect}
+      dir="ltr"
+      aria-label={token.text}
+      className={`inline-flex min-h-12 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 bg-card px-4 text-lg font-extrabold text-black shadow-sm active:scale-95 dark:text-white ${
+        speaking ? "border-apricot" : "border-card-border"
       }`}
     >
-      <button
-        type="button"
-        onClick={onSelect}
-        dir="ltr"
-        className="min-h-12 touch-manipulation px-3 text-lg font-extrabold text-black active:scale-95 dark:text-white"
-      >
-        {token.text}
-      </button>
-      {inAnswer ? null : (
-        <button
-          type="button"
-          aria-label={`استمع إلى ${spokenWord(token.text)}`}
-          onClick={onSpeak}
-          className="flex w-11 items-center justify-center border-s border-card-border text-apricot-deep active:scale-95 dark:text-apricot"
-        >
-          <SpeakerIcon />
-        </button>
-      )}
-    </motion.div>
+      {token.text}
+    </motion.button>
   );
 }
 
