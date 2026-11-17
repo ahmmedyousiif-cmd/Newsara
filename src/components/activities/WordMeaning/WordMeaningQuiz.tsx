@@ -172,10 +172,7 @@ export function WordMeaningQuiz({
         </h2>
 
         <div className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-2">
-          <div dir="ltr" className="flex items-center justify-center gap-2">
-            <p className="text-center text-4xl font-extrabold tracking-tight text-black sm:text-5xl dark:text-white">
-              {item.promptEn}
-            </p>
+          <div dir="ltr" className="flex items-center justify-center gap-3">
             <button
               type="button"
               data-review="listen"
@@ -184,9 +181,9 @@ export function WordMeaningQuiz({
               onClick={() => {
                 void PremiumTTSManager.playWord(item.promptEn);
               }}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot/45 transition-transform active:scale-95 dark:text-apricot/40"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M4 10v4h3l5 4V6L7 10H4z" fill="currentColor" />
                 <path
                   d="M16.5 8.5a5 5 0 010 7"
@@ -196,6 +193,9 @@ export function WordMeaningQuiz({
                 />
               </svg>
             </button>
+            <p className="text-center text-4xl font-extrabold tracking-tight text-black sm:text-5xl dark:text-white">
+              {item.promptEn}
+            </p>
           </div>
           {item.mode === "choice" && item.layout === "horizontal" ? (
             <div className="flex min-h-0 w-full max-w-sm flex-1 flex-col">
@@ -219,7 +219,7 @@ export function WordMeaningQuiz({
               </div>
               <div
                 dir="rtl"
-                className="mt-auto flex w-full gap-3 pt-6"
+                className="mt-6 flex w-full gap-3"
                 role="listbox"
                 aria-label="اختر معنى الكلمة"
               >
@@ -237,7 +237,6 @@ export function WordMeaningQuiz({
                       onClick={() => {
                         if (locked) return;
                         setSelectedId(option.id);
-                        PremiumTTSManager.playArabic(option.text);
                       }}
                       className={`flex min-h-14 min-w-0 flex-1 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-1 text-base font-extrabold leading-5 transition-[transform,background-color,border-color,opacity] duration-200 ease-out active:scale-95 disabled:cursor-not-allowed ${
                         selected

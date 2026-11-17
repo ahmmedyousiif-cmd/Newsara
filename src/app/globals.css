@@ -147,8 +147,34 @@ body {
   font-size: 1.125rem;
 }
 
+@keyframes question-shift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  16% {
+    transform: translateX(-3px);
+  }
+  32% {
+    transform: translateX(0);
+  }
+  48% {
+    transform: translateX(3px);
+  }
+  64% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(-2px);
+  }
+}
+
 .animate-shake {
   animation: shake 0.35s ease-out;
+}
+
+.animate-question-shift {
+  animation: question-shift 0.72s ease-out;
 }
 
 .animate-match-jump {

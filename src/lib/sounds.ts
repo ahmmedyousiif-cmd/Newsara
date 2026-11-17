@@ -145,6 +145,11 @@ function vibratePattern(pattern: number | number[]) {
   }
 }
 
+/** Soft broken pulses when a lesson-2 answer sound plays and the next question arrives. */
+export function vibrateAnswerShift() {
+  vibratePattern([14, 130, 24, 160, 16, 190, 32]);
+}
+
 /** Physical haptic pulse — ~1s continue-round feedback. */
 export function vibrateContinuePulse() {
   // Impact → short rhythmic fade within about one second

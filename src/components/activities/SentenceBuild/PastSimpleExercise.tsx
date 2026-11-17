@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { FeedbackSheet } from "@/components/activities/TranslateWord/FeedbackSheet";
-import { playFinaleSound, playSuccessSound, playWrongSound } from "@/lib/sounds";
+import { playFinaleSound, playSuccessSound, playWrongSound, vibrateAnswerShift } from "@/lib/sounds";
 import { encouragementForStep, formatArabicDate } from "@/lib/rewardCopy";
 import { normalizeAnswer } from "@/lib/typo";
 import type { SentenceBuildActivity, SentenceBuildItem } from "@/types/sentenceBuild";
@@ -141,6 +141,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
     if (!correct) {
       if (successTimer.current) window.clearTimeout(successTimer.current);
       playWrongSound();
+      vibrateAnswerShift();
       setShake(true);
       setFeedback("ERROR");
       speakSentenceAfter(spoken, 480);
@@ -154,7 +155,10 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
     successTimer.current = window.setTimeout(() => {
       setFeedback("SUCCESS");
       if (last) playFinaleSound();
-      else playSuccessSound();
+      else {
+        playSuccessSound();
+        vibrateAnswerShift();
+      }
       speakSentenceAfter(spoken, last ? 980 : 720);
     }, RISE_MS);
   };
@@ -162,7 +166,10 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   const continueAfterFeedback = () => {
     if (!feedback) return;
     if (index >= items.length - 1) setDone(true);
-    else setIndex((current) => current + 1);
+    else {
+      vibrateAnswerShift();
+      setIndex((current) => current + 1);
+    }
   };
 
   const addToken = (id: string) => {
@@ -243,7 +250,9 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
         >
           <div
             dir="ltr"
-            className="mx-4 mt-4 flex items-start gap-3 rounded-2xl border border-[#EDD9BC] bg-[#FFFDF8] px-3 py-3 shadow-sm dark:border-white/10 dark:bg-white/5"
+            className={`mx-4 mt-4 flex items-start gap-3 rounded-2xl border border-[#EDD9BC] bg-[#FFFDF8] px-3 py-3 shadow-sm dark:border-white/10 dark:bg-white/5 ${
+              index > 0 ? "animate-question-shift" : ""
+            }`}
           >
             <button
               type="button"
