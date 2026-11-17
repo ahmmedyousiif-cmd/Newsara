@@ -181,9 +181,9 @@ export function WordMeaningQuiz({
               onClick={() => {
                 void PremiumTTSManager.playWord(item.promptEn);
               }}
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot/45 transition-transform active:scale-95 dark:text-apricot/40"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-apricot/35 transition-transform active:scale-95 dark:text-apricot/30"
             >
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M4 10v4h3l5 4V6L7 10H4z" fill="currentColor" />
                 <path
                   d="M16.5 8.5a5 5 0 010 7"
@@ -209,6 +209,8 @@ export function WordMeaningQuiz({
                     disabled={locked}
                     onClick={() => {
                       if (locked) return;
+                      const word = options.find((option) => option.id === selectedId)?.text;
+                      if (word) PremiumTTSManager.playArabic(word);
                       setSelectedId(null);
                     }}
                     className="animate-word-rise text-2xl font-extrabold text-black active:scale-95 dark:text-white"
@@ -219,7 +221,7 @@ export function WordMeaningQuiz({
               </div>
               <div
                 dir="rtl"
-                className="mt-6 flex w-full gap-3"
+                className="mt-14 flex w-full gap-3"
                 role="listbox"
                 aria-label="اختر معنى الكلمة"
               >
@@ -236,6 +238,7 @@ export function WordMeaningQuiz({
                       disabled={locked || selected}
                       onClick={() => {
                         if (locked) return;
+                        PremiumTTSManager.playArabic(option.text);
                         setSelectedId(option.id);
                       }}
                       className={`flex min-h-14 min-w-0 flex-1 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-1 text-base font-extrabold leading-5 transition-[transform,background-color,border-color,opacity] duration-200 ease-out active:scale-95 disabled:cursor-not-allowed ${
@@ -270,6 +273,7 @@ export function WordMeaningQuiz({
                     disabled={locked}
                     onClick={() => {
                       if (locked) return;
+                      PremiumTTSManager.playArabic(option.text);
                       setSelectedId((prev) =>
                         prev === option.id ? null : option.id,
                       );
