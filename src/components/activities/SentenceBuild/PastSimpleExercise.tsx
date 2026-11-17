@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutGroup, motion } from "framer-motion";
 import { playSuccessSound, playWrongSound } from "@/lib/sounds";
@@ -9,6 +8,7 @@ import { formatArabicDate } from "@/lib/rewardCopy";
 import { normalizeAnswer } from "@/lib/typo";
 import type { SentenceBuildActivity, SentenceBuildItem } from "@/types/sentenceBuild";
 import { PremiumTTSManager } from "@/utils/PremiumTTSManager";
+import { LessonTopBar } from "@/components/activities/WordMeaning/LessonTopBar";
 import { ExerciseCompletionCard } from "./ExerciseCompletionCard";
 
 type Token = { id: string; text: string };
@@ -162,44 +162,32 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   if (!item) return null;
 
   return (
-    <div className="mx-auto flex h-full min-h-full w-full max-w-md flex-col bg-cream-soft px-4 pt-4 pb-6 select-none dark:bg-[#131F24]">
-      <div className="flex items-center gap-2" dir="rtl">
-        <Link
-          href="/"
-          aria-label="رجوع"
-          className="flex h-12 w-12 items-center justify-center rounded-xl text-apricot-deep active:scale-95 dark:text-apricot"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
-        <p className="flex-1 text-center text-sm font-extrabold text-slate-700 dark:text-slate-200">
-          {`\u202A${index + 1} من ${items.length}\u202C`}
-        </p>
-        <span className="w-12" />
-      </div>
+    <div className="mx-auto flex h-full min-h-full w-full max-w-md flex-col bg-cream-soft pb-6 select-none dark:bg-[#131F24]">
+      <LessonTopBar
+        progress={Math.round(((index + 1) / items.length) * 100)}
+      />
 
-      <div dir="ltr" className="mt-5 flex items-start justify-center gap-2">
-        <p className="text-center text-xl font-extrabold leading-8 text-slate-900 dark:text-white">
-          {item.prompt}{" "}
-          <span className="text-base font-bold text-slate-500">({item.sentenceType})</span>
-        </p>
+      <div dir="ltr" className="mt-5 flex items-center justify-center gap-3 px-4">
         <button
           type="button"
           aria-label="استمع إلى الجملة"
           onClick={() => speak("sentence", item.spoken)}
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot ${
+          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot ${
             speaking === "sentence" ? "bg-apricot/20" : ""
           }`}
         >
-          <SpeakerIcon />
+          <SpeakerIcon large />
         </button>
+        <p className="text-left text-xl font-extrabold leading-8 text-slate-900 dark:text-white">
+          {item.prompt}{" "}
+          <span className="text-base font-bold text-slate-500">({item.sentenceType})</span>
+        </p>
       </div>
 
       <LayoutGroup id={item.id}>
         <div
           dir="ltr"
-          className={`mt-5 flex min-h-28 flex-wrap content-start gap-2 rounded-2xl border-2 border-dashed px-3 py-3 ${
+          className={`mx-4 mt-5 flex min-h-28 flex-wrap content-start gap-2 rounded-2xl border-2 border-dashed px-3 py-3 ${
             solved
               ? "border-[#3D9A6A] bg-[#3D9A6A]/10"
               : "border-[#EDD9BC] dark:border-white/15"
@@ -218,7 +206,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
           ))}
         </div>
 
-        <div dir="ltr" className="mt-auto flex flex-wrap gap-2 pt-8">
+        <div dir="ltr" className="mt-auto flex flex-wrap gap-2 px-4 pt-8">
           {bank.map((token) => {
             const taken = selectedIds.includes(token.id);
             if (taken) {
@@ -277,9 +265,10 @@ function WordTile({
   );
 }
 
-function SpeakerIcon() {
+function SpeakerIcon({ large = false }: { large?: boolean }) {
+  const size = large ? 30 : 16;
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M4 10v4h3l5 4V6L7 10H4z" fill="currentColor" />
       <path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
