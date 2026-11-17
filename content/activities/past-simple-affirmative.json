@@ -1,0 +1,30 @@
+{
+  "id": "past-simple-affirmative",
+  "lessonName": "Past Simple – Affirmative",
+  "items": [
+    {
+      "id": "ps-visit",
+      "prompt": "Yesterday, I (visit) my grandmother.",
+      "sentenceType": "Affirmative",
+      "bank": ["grandmother.", "Yesterday,", "my", "visited", "I"],
+      "answer": ["Yesterday,", "I", "visited", "my", "grandmother."],
+      "spoken": "Yesterday, I visited my grandmother."
+    },
+    {
+      "id": "ps-watch",
+      "prompt": "Last night, she (watch) a movie.",
+      "sentenceType": "Affirmative",
+      "bank": ["a", "watched", "night,", "movie.", "Last", "she"],
+      "answer": ["Last", "night,", "she", "watched", "a", "movie."],
+      "spoken": "Last night, she watched a movie."
+    },
+    {
+      "id": "ps-play",
+      "prompt": "Two days ago, they (play) football.",
+      "sentenceType": "Affirmative",
+      "bank": ["football.", "played", "ago,", "they", "Two", "days"],
+      "answer": ["Two", "days", "ago,", "they", "played", "football."],
+      "spoken": "Two days ago, they played football."
+    }
+  ]
+}
