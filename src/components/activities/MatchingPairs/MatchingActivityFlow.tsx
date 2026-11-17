@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MatchingPairsContainer } from "./MatchingPairsContainer";
 import { TranslateWordQuiz } from "@/components/activities/TranslateWord/TranslateWordQuiz";
+import { WordMeaningQuiz } from "@/components/activities/WordMeaning/WordMeaningQuiz";
 import { RewardScreen } from "@/components/reward/RewardScreen";
 import {
   playCompleteSound,
@@ -13,8 +14,10 @@ import {
 } from "@/lib/sounds";
 import { formatArabicDate } from "@/lib/rewardCopy";
 import { getActivitySets, type MatchingActivity } from "@/types/matching";
+import type { WordMeaningActivity } from "@/types/meaning";
 import type { TranslateActivity } from "@/types/translate";
 import lessonsJson from "../../../../content/curriculum/lessons.json";
+import meaningJson from "../../../../content/activities/word-meaning.json";
 import translateJson from "../../../../content/activities/translate-vocab.json";
 
 type MatchingActivityFlowProps = {
@@ -23,6 +26,7 @@ type MatchingActivityFlowProps = {
 
 const SLIDE_MS = 1100;
 const translateActivity = translateJson as TranslateActivity;
+const meaningActivity = meaningJson as WordMeaningActivity;
 
 const lessonMeta = (() => {
   const data = lessonsJson as {
@@ -49,14 +53,17 @@ function activityFallbackTitle() {
 export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const router = useRouter();
   const sets = useMemo(() => getActivitySets(activity), [activity]);
+  const meaningItems = meaningActivity.items;
   const quizItems = translateActivity.items;
-  const quizStart = sets.length;
-  const rewardIndex = quizStart + quizItems.length;
+  const meaningStart = sets.length;
+  const translateStart = meaningStart + meaningItems.length;
+  const rewardIndex = translateStart + quizItems.length;
   const totalPairs = useMemo(
     () => sets.reduce((sum, set) => sum + set.pairs.length, 0),
     [sets],
   );
-  const totalQuestions = totalPairs + quizItems.length;
+  const totalQuestions =
+    totalPairs + meaningItems.length + quizItems.length;
 
   const [boardSeed, setBoardSeed] = useState("board");
   const [stage, setStage] = useState<number[]>([0]);
@@ -169,15 +176,30 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
 
     const isLastMatching = currentIndex >= sets.length - 1;
     if (isLastMatching) {
-      // Both matching boards done — haptic, then quiz / reward.
+      // Both matching boards done — haptic, then meaning / quiz / reward.
       vibrateMatchingComplete();
-      slideTo(quizStart < rewardIndex ? quizStart : rewardIndex);
+      const nextStage =
+        meaningItems.length > 0
+          ? meaningStart
+          : quizItems.length > 0
+            ? translateStart
+            : rewardIndex;
+      slideTo(nextStage);
       return;
     }
 
     // Matching set 1 → set 2: motivational continue cue + haptic
     slideTo(currentIndex + 1, "continue");
-  }, [currentIndex, sets.length, quizStart, rewardIndex, slideTo]);
+  }, [
+    currentIndex,
+    meaningItems.length,
+    meaningStart,
+    quizItems.length,
+    rewardIndex,
+    sets.length,
+    slideTo,
+    translateStart,
+  ]);
 
   const handleQuizContinue = useCallback(() => {
     if (lockRef.current) return;
@@ -207,7 +229,8 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     <div className="groups-wrapper relative bg-cream-soft dark:bg-[#131F24]">
       {stage.map((index) => {
         const isReward = index >= rewardIndex;
-        const isQuiz = !isReward && index >= quizStart;
+        const isTranslate = !isReward && index >= translateStart;
+        const isMeaning = !isReward && !isTranslate && index >= meaningStart;
         const isOutgoing = index === currentIndex && isTransitioning;
         const isIncoming = index !== currentIndex && isTransitioning;
         const isSolo = !isTransitioning;
@@ -219,13 +242,15 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
         else if (isIncoming && !incomingActive) blockClass = "group-enter-left";
         else if (isSolo) blockClass = "group-active";
 
-        const quizItemIndex = index - quizStart;
-        const quizItem = quizItems[quizItemIndex];
+        const meaningItem = meaningItems[index - meaningStart];
+        const quizItem = quizItems[index - translateStart];
         const blockKey = isReward
           ? "reward"
-          : isQuiz
+          : isTranslate
             ? quizItem?.id ?? `quiz-${index}`
-            : sets[index]?.id;
+            : isMeaning
+              ? meaningItem?.id ?? `meaning-${index}`
+              : sets[index]?.id;
 
         return (
           <div
@@ -252,7 +277,26 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 }}
                 onContinue={() => router.push("/")}
               />
-            ) : isQuiz && quizItem ? (
+            ) : isMeaning && meaningItem ? (
+              <WordMeaningQuiz
+                key={meaningItem.id}
+                instruction={meaningActivity.instruction}
+                item={meaningItem}
+                progress={lessonProgress}
+                isFinalItem={index === rewardIndex - 1}
+                interactionLocked={isTransitioning || showingReward}
+                onResult={
+                  index === currentIndex && !isTransitioning
+                    ? handleQuizResult
+                    : undefined
+                }
+                onContinue={
+                  index === currentIndex && !isTransitioning
+                    ? handleQuizContinue
+                    : () => {}
+                }
+              />
+            ) : isTranslate && quizItem ? (
               <TranslateWordQuiz
                 key={quizItem.id}
                 instruction={translateActivity.instruction}

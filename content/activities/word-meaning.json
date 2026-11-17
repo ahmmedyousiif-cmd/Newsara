@@ -1,0 +1,107 @@
+{
+  "id": "vocab-word-meaning",
+  "engine": "word-meaning",
+  "instruction": "ما معنى الكلمة",
+  "items": [
+    {
+      "id": "mean-coffee",
+      "promptEn": "coffee",
+      "correctId": "coffee",
+      "options": [
+        { "id": "coffee", "text": "قهوة" },
+        { "id": "tea", "text": "شاي" },
+        { "id": "milk", "text": "حليب" }
+      ]
+    },
+    {
+      "id": "mean-tea",
+      "promptEn": "tea",
+      "correctId": "tea",
+      "options": [
+        { "id": "tea", "text": "شاي" },
+        { "id": "water", "text": "ماء" },
+        { "id": "coffee", "text": "قهوة" }
+      ]
+    },
+    {
+      "id": "mean-milk",
+      "promptEn": "milk",
+      "correctId": "milk",
+      "options": [
+        { "id": "milk", "text": "حليب" },
+        { "id": "sugar", "text": "سكر" },
+        { "id": "tea", "text": "شاي" }
+      ]
+    },
+    {
+      "id": "mean-sugar",
+      "promptEn": "sugar",
+      "correctId": "sugar",
+      "options": [
+        { "id": "sugar", "text": "سكر" },
+        { "id": "water", "text": "ماء" },
+        { "id": "coffee", "text": "قهوة" }
+      ]
+    },
+    {
+      "id": "mean-water",
+      "promptEn": "water",
+      "correctId": "water",
+      "options": [
+        { "id": "water", "text": "ماء" },
+        { "id": "milk", "text": "حليب" },
+        { "id": "sugar", "text": "سكر" }
+      ]
+    },
+    {
+      "id": "mean-book",
+      "promptEn": "book",
+      "correctId": "book",
+      "options": [
+        { "id": "book", "text": "كتاب" },
+        { "id": "pen", "text": "قلم" },
+        { "id": "school", "text": "مدرسة" }
+      ]
+    },
+    {
+      "id": "mean-pen",
+      "promptEn": "pen",
+      "correctId": "pen",
+      "options": [
+        { "id": "pen", "text": "قلم" },
+        { "id": "book", "text": "كتاب" },
+        { "id": "door", "text": "باب" }
+      ]
+    },
+    {
+      "id": "mean-school",
+      "promptEn": "school",
+      "correctId": "school",
+      "options": [
+        { "id": "school", "text": "مدرسة" },
+        { "id": "door", "text": "باب" },
+        { "id": "apple", "text": "تفاحة" }
+      ]
+    },
+    {
+      "id": "mean-door",
+      "promptEn": "door",
+      "correctId": "door",
+      "options": [
+        { "id": "door", "text": "باب" },
+        { "id": "school", "text": "مدرسة" },
+        { "id": "pen", "text": "قلم" }
+      ]
+    },
+    {
+      "id": "mean-apple",
+      "promptEn": "apple",
+      "correctId": "apple",
+      "options": [
+        { "id": "apple", "text": "تفاحة" },
+        { "id": "book", "text": "كتاب" },
+        { "id": "door", "text": "باب" }
+      ]
+    }
+  ]
+}
