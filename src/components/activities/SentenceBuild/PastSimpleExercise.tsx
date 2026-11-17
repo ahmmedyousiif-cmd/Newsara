@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LayoutGroup, motion } from "framer-motion";
-import { playSuccessSound, playWrongSound } from "@/lib/sounds";
+import { FeedbackSheet } from "@/components/activities/TranslateWord/FeedbackSheet";
+import { playFinaleSound, playSuccessSound, playWrongSound } from "@/lib/sounds";
 import { formatArabicDate } from "@/lib/rewardCopy";
 import { normalizeAnswer } from "@/lib/typo";
 import type { SentenceBuildActivity, SentenceBuildItem } from "@/types/sentenceBuild";
@@ -41,14 +42,13 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   const [index, setIndex] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [shake, setShake] = useState(false);
-  const [solved, setSolved] = useState(false);
+  const [feedback, setFeedback] = useState<"SUCCESS" | "ERROR" | null>(null);
   const [speaking, setSpeaking] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [date, setDate] = useState("");
   const firstMarkedRef = useRef(false);
   const lastCheckedRef = useRef("");
-  const advanceTimer = useRef<number | null>(null);
   const speakTimer = useRef<number | null>(null);
 
   const item = items[index];
@@ -65,14 +65,11 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   useEffect(() => {
     setSelectedIds([]);
     setShake(false);
-    setSolved(false);
+    setFeedback(null);
     setSpeaking(null);
     firstMarkedRef.current = false;
     lastCheckedRef.current = "";
     PremiumTTSManager.cancel();
-    return () => {
-      if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
-    };
   }, [item?.id]);
 
   const markSpeaking = (key: string) => {
@@ -89,7 +86,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   };
 
   const grade = (nextIds: string[]) => {
-    if (!item || solved) return;
+    if (!item || feedback) return;
     const chosen = nextIds.map((id) => byId.get(id)?.text ?? "");
     const signature = chosen.join("|");
     if (chosen.length !== item.answer.length) return;
@@ -108,28 +105,31 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
     if (!correct) {
       playWrongSound();
       setShake(true);
+      setFeedback("ERROR");
       window.setTimeout(() => setShake(false), 360);
       return;
     }
 
-    setSolved(true);
-    const isLast = index >= items.length - 1;
-    if (!isLast) playSuccessSound();
-    advanceTimer.current = window.setTimeout(() => {
-      if (isLast) setDone(true);
-      else setIndex((current) => current + 1);
-    }, 620);
+    setFeedback("SUCCESS");
+    if (index >= items.length - 1) playFinaleSound();
+    else playSuccessSound();
+  };
+
+  const continueAfterFeedback = () => {
+    if (!feedback) return;
+    if (index >= items.length - 1) setDone(true);
+    else setIndex((current) => current + 1);
   };
 
   const addToken = (id: string) => {
-    if (solved || selectedIds.includes(id)) return;
+    if (feedback || selectedIds.includes(id)) return;
     const next = [...selectedIds, id];
     setSelectedIds(next);
     grade(next);
   };
 
   const removeToken = (id: string) => {
-    if (solved) return;
+    if (feedback) return;
     const next = selectedIds.filter((current) => current !== id);
     lastCheckedRef.current = "";
     setSelectedIds(next);
@@ -162,12 +162,12 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   if (!item) return null;
 
   return (
-    <div className="mx-auto flex h-full min-h-full w-full max-w-md flex-col bg-cream-soft pb-6 select-none dark:bg-[#131F24]">
+    <div className="relative mx-auto flex h-dvh min-h-dvh w-full max-w-md flex-col overflow-hidden bg-cream-soft pb-6 select-none dark:bg-[#131F24]">
       <LessonTopBar
         progress={Math.round(((index + 1) / items.length) * 100)}
       />
 
-      <div dir="ltr" className="mt-5 flex items-center justify-center gap-3 px-4">
+      <div dir="ltr" className="mt-5 flex items-start justify-start gap-3 px-4">
         <button
           type="button"
           aria-label="استمع إلى الجملة"
@@ -188,7 +188,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
         <div
           dir="ltr"
           className={`mx-4 mt-5 flex min-h-28 flex-wrap content-start gap-2 rounded-2xl border-2 border-dashed px-3 py-3 ${
-            solved
+            feedback === "SUCCESS"
               ? "border-[#3D9A6A] bg-[#3D9A6A]/10"
               : "border-[#EDD9BC] dark:border-white/15"
           } ${shake ? "animate-shake" : ""}`}
@@ -234,6 +234,13 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
           })}
         </div>
       </LayoutGroup>
+      {feedback ? (
+        <FeedbackSheet
+          state={feedback}
+          correctAnswer={item.spoken}
+          onContinue={continueAfterFeedback}
+        />
+      ) : null}
     </div>
   );
 }
