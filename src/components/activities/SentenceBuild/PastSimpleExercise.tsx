@@ -67,6 +67,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   const lastCheckedRef = useRef("");
   const speakTimer = useRef<number | null>(null);
   const successTimer = useRef<number | null>(null);
+  const sentenceTimer = useRef<number | null>(null);
   const [dark, setDark] = useState(false);
 
   const item = items[index];
@@ -88,6 +89,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
   useEffect(() => {
     if (successTimer.current) window.clearTimeout(successTimer.current);
+    if (sentenceTimer.current) window.clearTimeout(sentenceTimer.current);
     setSelectedIds([]);
     setShake(false);
     setFeedback(null);
@@ -110,6 +112,13 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
     void PremiumTTSManager.playWord(text);
   };
 
+  const speakSentenceAfter = (text: string, delay: number) => {
+    if (sentenceTimer.current) window.clearTimeout(sentenceTimer.current);
+    sentenceTimer.current = window.setTimeout(() => {
+      speak("sentence", text);
+    }, delay);
+  };
+
   const grade = (nextIds: string[]) => {
     if (!item || feedback) return;
     const chosen = nextIds.map((id) => byId.get(id)?.text ?? "");
@@ -127,11 +136,14 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
       if (correct) setFirstTryCorrect((count) => count + 1);
     }
 
+    const spoken = item.spoken;
+
     if (!correct) {
       if (successTimer.current) window.clearTimeout(successTimer.current);
       playWrongSound();
       setShake(true);
       setFeedback("ERROR");
+      speakSentenceAfter(spoken, 480);
       window.setTimeout(() => setShake(false), 360);
       return;
     }
@@ -143,6 +155,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
       setFeedback("SUCCESS");
       if (last) playFinaleSound();
       else playSuccessSound();
+      speakSentenceAfter(spoken, last ? 980 : 720);
     }, RISE_MS);
   };
 
