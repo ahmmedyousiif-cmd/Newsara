@@ -6,6 +6,8 @@ type FeedbackSheetProps = {
   state: Extract<InteractionState, "SUCCESS" | "TYPO" | "ERROR">;
   correctAnswer: string;
   onContinue: () => void;
+  title?: string;
+  subtitle?: string | null;
 };
 
 const COPY = {
@@ -33,8 +35,12 @@ export function FeedbackSheet({
   state,
   correctAnswer,
   onContinue,
+  title,
+  subtitle,
 }: FeedbackSheetProps) {
   const copy = COPY[state];
+  const heading = title ?? copy.title;
+  const detail = subtitle !== undefined ? subtitle : copy.subtitle;
 
   return (
     <div
@@ -45,12 +51,12 @@ export function FeedbackSheet({
         className={`pointer-events-auto animate-slide-up rounded-t-3xl px-5 pb-6 pt-5 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] will-change-transform ${copy.sheet}`}
       >
         <p dir="rtl" className="text-xl font-extrabold text-white sm:text-2xl">
-          {copy.title}
+          {heading}
         </p>
 
-        {state === "SUCCESS" && copy.subtitle ? (
+        {state === "SUCCESS" && detail ? (
           <p dir="rtl" className="mt-1 text-base font-semibold text-white/90">
-            {copy.subtitle}
+            {detail}
           </p>
         ) : null}
 

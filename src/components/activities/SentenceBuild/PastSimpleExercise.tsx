@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { FeedbackSheet } from "@/components/activities/TranslateWord/FeedbackSheet";
 import { playFinaleSound, playSuccessSound, playWrongSound } from "@/lib/sounds";
-import { formatArabicDate } from "@/lib/rewardCopy";
+import { encouragementForStep, formatArabicDate } from "@/lib/rewardCopy";
 import { normalizeAnswer } from "@/lib/typo";
 import type { SentenceBuildActivity, SentenceBuildItem } from "@/types/sentenceBuild";
 import { PremiumTTSManager } from "@/utils/PremiumTTSManager";
@@ -18,12 +18,28 @@ type PastSimpleExerciseProps = {
   activity: SentenceBuildActivity;
 };
 
+const RISE_MS = 640;
+
 const chipMotion = {
-  type: "spring" as const,
-  stiffness: 520,
-  damping: 34,
-  mass: 0.65,
+  layout: { duration: RISE_MS / 1000, ease: [0.22, 1, 0.36, 1] as const },
+  backgroundColor: { duration: RISE_MS / 1000, ease: "easeOut" as const },
+  borderColor: { duration: RISE_MS / 1000, ease: "easeOut" as const },
 };
+
+const chipColors = {
+  light: {
+    bank: "#fffdf8",
+    bankBorder: "#edd9bc",
+    placed: "#ffe0bc",
+    placedBorder: "#e8893a",
+  },
+  dark: {
+    bank: "#1f2e35",
+    bankBorder: "#37464f",
+    placed: "#4a3424",
+    placedBorder: "#f0a05a",
+  },
+} as const;
 
 function tokensOf(item: SentenceBuildItem): Token[] {
   return item.bank.map((text, index) => ({
@@ -50,6 +66,8 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
   const firstMarkedRef = useRef(false);
   const lastCheckedRef = useRef("");
   const speakTimer = useRef<number | null>(null);
+  const successTimer = useRef<number | null>(null);
+  const [dark, setDark] = useState(false);
 
   const item = items[index];
   const bank = useMemo(() => (item ? tokensOf(item) : []), [item]);
@@ -60,9 +78,16 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
   useEffect(() => {
     setDate(formatArabicDate());
+    const root = document.documentElement;
+    const sync = () => setDark(root.classList.contains("dark"));
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
+    if (successTimer.current) window.clearTimeout(successTimer.current);
     setSelectedIds([]);
     setShake(false);
     setFeedback(null);
@@ -103,6 +128,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
     }
 
     if (!correct) {
+      if (successTimer.current) window.clearTimeout(successTimer.current);
       playWrongSound();
       setShake(true);
       setFeedback("ERROR");
@@ -110,9 +136,14 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
       return;
     }
 
-    setFeedback("SUCCESS");
-    if (index >= items.length - 1) playFinaleSound();
-    else playSuccessSound();
+    if (successTimer.current) window.clearTimeout(successTimer.current);
+    const step = index;
+    const last = step >= items.length - 1;
+    successTimer.current = window.setTimeout(() => {
+      setFeedback("SUCCESS");
+      if (last) playFinaleSound();
+      else playSuccessSound();
+    }, RISE_MS);
   };
 
   const continueAfterFeedback = () => {
@@ -130,10 +161,14 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
   const removeToken = (id: string) => {
     if (feedback) return;
+    if (successTimer.current) window.clearTimeout(successTimer.current);
     const next = selectedIds.filter((current) => current !== id);
     lastCheckedRef.current = "";
     setSelectedIds(next);
   };
+
+  const praise = encouragementForStep(index, items.length);
+  const palette = dark ? chipColors.dark : chipColors.light;
 
   if (done) {
     const total = items.length;
@@ -167,77 +202,97 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
         progress={Math.round(((index + 1) / items.length) * 100)}
       />
 
-      <div dir="ltr" className="mt-5 flex items-start justify-start gap-3 px-4">
-        <button
-          type="button"
-          aria-label="استمع إلى الجملة"
-          onClick={() => speak("sentence", item.spoken)}
-          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot ${
-            speaking === "sentence" ? "bg-apricot/20" : ""
-          }`}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={item.id}
+          className="flex min-h-0 flex-1 flex-col"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -14 }}
+          transition={{ duration: 0.32, ease: "easeOut" }}
         >
-          <SpeakerIcon large />
-        </button>
-        <p className="text-left text-xl font-extrabold leading-8 text-slate-900 dark:text-white">
-          {item.prompt}{" "}
-          <span className="text-base font-bold text-slate-500">({item.sentenceType})</span>
-        </p>
-      </div>
+          <div
+            dir="ltr"
+            className="mx-4 mt-4 flex items-start gap-3 rounded-2xl border border-[#EDD9BC] bg-[#FFFDF8] px-3 py-3 shadow-sm dark:border-white/10 dark:bg-white/5"
+          >
+            <button
+              type="button"
+              aria-label="استمع إلى الجملة"
+              onClick={() => speak("sentence", item.spoken)}
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-apricot-deep transition-transform active:scale-95 dark:text-apricot ${
+                speaking === "sentence" ? "bg-apricot/20" : ""
+              }`}
+            >
+              <SpeakerIcon large />
+            </button>
+            <p className="pt-2 text-left text-xl font-extrabold leading-8 text-slate-900 dark:text-white">
+              {item.prompt}{" "}
+              <span className="text-base font-bold text-slate-500">({item.sentenceType})</span>
+            </p>
+          </div>
 
-      <LayoutGroup id={item.id}>
-        <div
-          dir="ltr"
-          className={`mx-4 mt-5 flex min-h-28 flex-wrap content-start gap-2 rounded-2xl border-2 border-dashed px-3 py-3 ${
-            feedback === "SUCCESS"
-              ? "border-[#3D9A6A] bg-[#3D9A6A]/10"
-              : "border-[#EDD9BC] dark:border-white/15"
-          } ${shake ? "animate-shake" : ""}`}
-        >
-          {selected.map((token) => (
-            <WordTile
-              key={token.id}
-              token={token}
-              speaking={speaking === token.id}
-              onSelect={() => {
-                speak(token.id, spokenWord(token.text));
-                removeToken(token.id);
-              }}
-            />
-          ))}
-        </div>
-
-        <div dir="ltr" className="mt-auto flex flex-wrap gap-2 px-4 pt-8">
-          {bank.map((token) => {
-            const taken = selectedIds.includes(token.id);
-            if (taken) {
-              return (
-                <span
+          <LayoutGroup id={item.id}>
+            <div
+              dir="ltr"
+              className={`mx-4 mt-4 flex min-h-28 flex-wrap content-start gap-2 rounded-2xl border-2 border-dashed px-3 py-3 ${
+                feedback === "SUCCESS"
+                  ? "border-[#3D9A6A] bg-[#3D9A6A]/10"
+                  : "border-[#F0C48A] bg-[#FFF3E4] dark:border-apricot/40 dark:bg-apricot/10"
+              } ${shake ? "animate-shake" : ""}`}
+            >
+              {selected.map((token) => (
+                <WordTile
                   key={token.id}
-                  aria-hidden
-                  className="inline-flex min-h-12 min-w-12 rounded-2xl border-2 border-transparent px-3 opacity-0"
-                >
-                  {token.text}
-                </span>
-              );
-            }
-            return (
-              <WordTile
-                key={token.id}
-                token={token}
-                speaking={speaking === token.id}
-                onSelect={() => {
-                  speak(token.id, spokenWord(token.text));
-                  addToken(token.id);
-                }}
-              />
-            );
-          })}
-        </div>
-      </LayoutGroup>
+                  token={token}
+                  placed
+                  palette={palette}
+                  speaking={speaking === token.id}
+                  onSelect={() => {
+                    speak(token.id, spokenWord(token.text));
+                    removeToken(token.id);
+                  }}
+                />
+              ))}
+            </div>
+
+            <div dir="ltr" className="mt-5 flex flex-wrap gap-2 px-4">
+              {bank.map((token) => {
+                const taken = selectedIds.includes(token.id);
+                if (taken) {
+                  return (
+                    <span
+                      key={token.id}
+                      aria-hidden
+                      className="inline-flex min-h-12 min-w-12 rounded-2xl border-2 border-transparent px-3 opacity-0"
+                    >
+                      {token.text}
+                    </span>
+                  );
+                }
+                return (
+                  <WordTile
+                    key={token.id}
+                    token={token}
+                    placed={false}
+                    palette={palette}
+                    speaking={speaking === token.id}
+                    onSelect={() => {
+                      speak(token.id, spokenWord(token.text));
+                      addToken(token.id);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </LayoutGroup>
+        </motion.div>
+      </AnimatePresence>
       {feedback ? (
         <FeedbackSheet
           state={feedback}
           correctAnswer={item.spoken}
+          title={feedback === "SUCCESS" ? praise.title : undefined}
+          subtitle={feedback === "SUCCESS" ? praise.subtitle : undefined}
           onContinue={continueAfterFeedback}
         />
       ) : null}
@@ -247,10 +302,14 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
 function WordTile({
   token,
+  placed,
+  palette,
   speaking,
   onSelect,
 }: {
   token: Token;
+  placed: boolean;
+  palette: (typeof chipColors)[keyof typeof chipColors];
   speaking: boolean;
   onSelect: () => void;
 }) {
@@ -260,12 +319,14 @@ function WordTile({
       layout
       layoutId={token.id}
       transition={chipMotion}
+      animate={{
+        backgroundColor: placed ? palette.placed : palette.bank,
+        borderColor: speaking ? "#f0a05a" : placed ? palette.placedBorder : palette.bankBorder,
+      }}
       onClick={onSelect}
       dir="ltr"
       aria-label={token.text}
-      className={`inline-flex min-h-12 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 bg-card px-4 text-lg font-extrabold text-black shadow-sm active:scale-95 dark:text-white ${
-        speaking ? "border-apricot" : "border-card-border"
-      }`}
+      className="inline-flex min-h-12 touch-manipulation items-center justify-center rounded-2xl border-2 border-b-4 px-4 text-lg font-extrabold text-black shadow-sm active:scale-95 dark:text-white"
     >
       {token.text}
     </motion.button>

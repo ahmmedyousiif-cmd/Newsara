@@ -99,6 +99,25 @@ export function pickPedagogicalNarrative(level: PerformanceLevel): string {
   return pickRotated(`narrative:${level}`, NARRATIVES[level]);
 }
 
+/** تشجيع يتصاعد مع ترتيب السؤال داخل التمرين، لا يكرر نفس العبارة. */
+export function encouragementForStep(
+  index: number,
+  total: number,
+): { title: string; subtitle: string } {
+  const remaining = Math.max(0, total - index - 1);
+  if (index <= 0) {
+    return { title: "أحسنت!", subtitle: "بداية موفقة، كمّل." };
+  }
+  if (remaining <= 0) {
+    return { title: "ممتاز!", subtitle: "أنهيت السلسلة، واصل بهذا الحماس." };
+  }
+  if (remaining === 1) {
+    return { title: "رائع!", subtitle: "أنت مستمر، بقي سؤال واحد." };
+  }
+  const left = remaining === 2 ? "سؤالان" : `${remaining} أسئلة`;
+  return { title: "رائع!", subtitle: `أنت مستمر، بقي ${left}.` };
+}
+
 const ARABIC_MONTHS = [
   "كانون الثاني",
   "شباط",
