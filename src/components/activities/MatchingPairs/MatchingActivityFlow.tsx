@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MatchingPairsContainer } from "./MatchingPairsContainer";
-import { DictationQuiz } from "@/components/activities/WordMeaning/DictationQuiz";
 import { WordMeaningQuiz } from "@/components/activities/WordMeaning/WordMeaningQuiz";
 import { RewardScreen } from "@/components/reward/RewardScreen";
 import {
@@ -61,16 +60,12 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     [pairs, roundSeed],
   );
   const meaningItems = rounds.meaning;
-  const dictationItems = rounds.dictation;
   const meaningStart = sets.length;
-  const dictationStart = meaningStart + meaningItems.length;
-  const rewardIndex = dictationStart + dictationItems.length;
+  const rewardIndex = meaningStart + meaningItems.length;
   const totalPairs = pairs.length;
-  const totalQuestions =
-    totalPairs + meaningItems.length + dictationItems.length;
+  const totalQuestions = totalPairs + meaningItems.length;
 
   const [boardSeed, setBoardSeed] = useState("board");
-  const [skippedMeaning, setSkippedMeaning] = useState(0);
   const [stage, setStage] = useState<number[]>([0]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [outgoingExiting, setOutgoingExiting] = useState(false);
@@ -97,11 +92,11 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
   const showingReward = currentIndex >= rewardIndex && !isTransitioning;
 
   const lessonProgress = useMemo(() => {
-    const total = Math.max(1, totalQuestions - skippedMeaning);
+    const total = Math.max(1, totalQuestions);
     return Math.round(
       (Math.min(completedUnits, total) / total) * 100,
     );
-  }, [completedUnits, skippedMeaning, totalQuestions]);
+  }, [completedUnits, totalQuestions]);
 
   const bumpCombo = useCallback(() => {
     comboCurrentRef.current += 1;
@@ -183,12 +178,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     if (isLastMatching) {
       // Both matching boards done — haptic, then meaning / quiz / reward.
       vibrateMatchingComplete();
-      const nextStage =
-        meaningItems.length > 0
-          ? meaningStart
-          : dictationItems.length > 0
-            ? dictationStart
-            : rewardIndex;
+      const nextStage = meaningItems.length > 0 ? meaningStart : rewardIndex;
       slideTo(nextStage);
       return;
     }
@@ -197,8 +187,6 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     slideTo(currentIndex + 1, "continue");
   }, [
     currentIndex,
-    dictationItems.length,
-    dictationStart,
     meaningItems.length,
     meaningStart,
     rewardIndex,
@@ -222,13 +210,6 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     slideTo(next, "none");
   }, [currentIndex, rewardIndex, slideTo]);
 
-  const handleStartDictation = useCallback(() => {
-    if (lockRef.current || currentIndex >= dictationStart) return;
-    const remaining = Math.max(0, dictationStart - currentIndex);
-    setSkippedMeaning(remaining);
-    slideTo(dictationStart, "none");
-  }, [currentIndex, dictationStart, slideTo]);
-
   const handleRetry = useCallback(() => {
     lockRef.current = false;
     finalePlayedRef.current = false;
@@ -237,7 +218,6 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     setCorrectCount(0);
     setCompletedUnits(0);
     setComboStreak(0);
-    setSkippedMeaning(0);
     setElapsedSeconds(0);
     setRewardDate(formatArabicDate());
     setBoardSeed(`${Date.now()}-${Math.random()}`);
@@ -264,8 +244,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
     <div className="groups-wrapper relative bg-cream-soft dark:bg-[#131F24]">
       {stage.map((index) => {
         const isReward = index >= rewardIndex;
-        const isDictation = !isReward && index >= dictationStart;
-        const isMeaning = !isReward && !isDictation && index >= meaningStart;
+        const isMeaning = !isReward && index >= meaningStart;
         const isOutgoing = index === currentIndex && isTransitioning;
         const isIncoming = index !== currentIndex && isTransitioning;
         const isSolo = !isTransitioning;
@@ -278,14 +257,11 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
         else if (isSolo) blockClass = "group-active";
 
         const meaningItem = meaningItems[index - meaningStart];
-        const dictationItem = dictationItems[index - dictationStart];
         const blockKey = isReward
           ? "reward"
-          : isDictation
-            ? `${dictationItem?.id ?? `spell-${index}`}-${roundSeed}`
-            : isMeaning
-              ? `${meaningItem?.id ?? `meaning-${index}`}-${roundSeed}`
-              : sets[index]?.id;
+          : isMeaning
+            ? `${meaningItem?.id ?? `meaning-${index}`}-${roundSeed}`
+            : sets[index]?.id;
 
         return (
           <div
@@ -305,7 +281,7 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 avatarUrl="/anime-student.png"
                 stats={{
                   correctAnswers: correctCount,
-                  totalQuestions: Math.max(1, totalQuestions - skippedMeaning),
+                  totalQuestions,
                   comboStreak,
                   timeInSeconds: elapsedSeconds,
                   date: rewardDate,
@@ -319,29 +295,6 @@ export function MatchingActivityFlow({ activity }: MatchingActivityFlowProps) {
                 key={`${meaningItem.id}-${roundSeed}`}
                 instruction="ما معنى الكلمة"
                 item={meaningItem}
-                progress={lessonProgress}
-                isFinalItem={index === rewardIndex - 1}
-                interactionLocked={isTransitioning || showingReward}
-                onStartDictation={
-                  index === currentIndex && !isTransitioning
-                    ? handleStartDictation
-                    : undefined
-                }
-                onResult={
-                  index === currentIndex && !isTransitioning
-                    ? handleQuizResult
-                    : undefined
-                }
-                onContinue={
-                  index === currentIndex && !isTransitioning
-                    ? handleQuizContinue
-                    : () => {}
-                }
-              />
-            ) : isDictation && dictationItem ? (
-              <DictationQuiz
-                key={`${dictationItem.id}-${roundSeed}`}
-                item={dictationItem}
                 progress={lessonProgress}
                 isFinalItem={index === rewardIndex - 1}
                 interactionLocked={isTransitioning || showingReward}

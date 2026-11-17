@@ -84,7 +84,7 @@ export function LessonTopBar({
             الإملاء
           </p>
           <p className="mt-1 text-sm font-bold leading-6 text-slate-600 dark:text-slate-300">
-            تظهر كلمة عربية، وتكتب ترجمتها بالإنجليزي.
+            اختياري. اضغط الكلمة إذا تريد تتدرّب على كتابتها.
           </p>
           {dictationActive ? null : (
             <button
@@ -96,7 +96,7 @@ export function LessonTopBar({
               }}
               className="mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl bg-apricot text-sm font-extrabold text-white transition-transform active:scale-95"
             >
-              ابدأ الإملاء
+              تدرّب على هذه الكلمة
             </button>
           )}
         </div>

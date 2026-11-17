@@ -13,6 +13,7 @@ import type { WordMeaningItem } from "@/types/meaning";
 import type { InteractionState } from "@/types/translate";
 import { PremiumTTSManager } from "@/utils/PremiumTTSManager";
 import { LessonTopBar } from "./LessonTopBar";
+import { OptionalDictationSheet } from "./OptionalDictationSheet";
 
 type WordMeaningQuizProps = {
   instruction: string;
@@ -22,7 +23,6 @@ type WordMeaningQuizProps = {
   interactionLocked?: boolean;
   onResult?: (correct: boolean) => void;
   onContinue: () => void;
-  onStartDictation?: () => void;
 };
 
 export function WordMeaningQuiz({
@@ -33,12 +33,12 @@ export function WordMeaningQuiz({
   interactionLocked = false,
   onResult,
   onContinue,
-  onStartDictation,
 }: WordMeaningQuizProps) {
   const [interactionState, setInteractionState] =
     useState<InteractionState>("IDLE");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
+  const [practiceOpen, setPracticeOpen] = useState(false);
   const scoredRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,6 +59,7 @@ export function WordMeaningQuiz({
     setInteractionState("IDLE");
     setSelectedId(null);
     setTyped("");
+    setPracticeOpen(false);
   }, [item]);
 
   useEffect(() => {
@@ -74,6 +75,12 @@ export function WordMeaningQuiz({
     const timer = window.setTimeout(() => inputRef.current?.focus(), 320);
     return () => window.clearTimeout(timer);
   }, [item, locked]);
+
+  const practiceArabic =
+    item.mode === "type"
+      ? item.answerAr
+      : (item.options.find((option) => option.id === item.correctId)?.text ??
+        "");
 
   const correctText = item.mode === "choice"
     ? (item.options.find((option) => option.id === item.correctId)?.text ??
@@ -130,7 +137,9 @@ export function WordMeaningQuiz({
       <LessonTopBar
         progress={progress}
         showDictation
-        onStartDictation={onStartDictation}
+        onStartDictation={
+          locked ? undefined : () => setPracticeOpen(true)
+        }
       />
 
       <div className="relative z-[10] flex min-h-0 flex-1 flex-col px-4 pb-4">
@@ -143,9 +152,15 @@ export function WordMeaningQuiz({
 
         <div className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-2">
           <div dir="ltr" className="flex items-center justify-center gap-2">
-            <p className="text-center text-4xl font-extrabold tracking-tight text-black sm:text-5xl dark:text-white">
+            <button
+              type="button"
+              disabled={locked}
+              aria-label={`تدريب إملاء اختياري لكلمة ${item.promptEn}`}
+              onClick={() => setPracticeOpen(true)}
+              className="text-center text-4xl font-extrabold tracking-tight text-black transition-transform active:scale-95 disabled:opacity-100 sm:text-5xl dark:text-white"
+            >
               {item.promptEn}
-            </p>
+            </button>
             <button
               type="button"
               aria-label="استمع إلى الكلمة"
@@ -165,6 +180,9 @@ export function WordMeaningQuiz({
               </svg>
             </button>
           </div>
+          <p dir="rtl" className="-mt-3 text-center text-xs font-bold text-slate-500">
+            اضغط الكلمة إذا تريد الإملاء، وهو اختياري
+          </p>
 
           {item.mode === "choice" ? (
             <div
@@ -237,6 +255,14 @@ export function WordMeaningQuiz({
           <div className="min-h-24 shrink-0" aria-hidden />
         )}
       </div>
+
+      {practiceOpen && practiceArabic ? (
+        <OptionalDictationSheet
+          promptAr={practiceArabic}
+          answerEn={item.promptEn}
+          onClose={() => setPracticeOpen(false)}
+        />
+      ) : null}
 
       {feedbackState ? (
         <FeedbackSheet

@@ -1,8 +1,5 @@
 import type { MatchingPair } from "@/types/matching";
-import type { DictationItem, WordMeaningItem } from "@/types/meaning";
-
-/** One dictation round samples this many words so it changes every try. */
-const DICTATION_COUNT = 5;
+import type { WordMeaningItem } from "@/types/meaning";
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -58,13 +55,5 @@ export function buildLessonRounds(pairs: MatchingPair[], seed: number) {
     };
   });
 
-  const dictation: DictationItem[] = shuffle(words, rand)
-    .slice(0, Math.min(DICTATION_COUNT, words.length))
-    .map((word) => ({
-      id: `spell-${word.pairId}`,
-      promptAr: word.ar,
-      answerEn: word.en,
-    }));
-
-  return { meaning, dictation };
+  return { meaning };
 }
