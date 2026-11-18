@@ -5,6 +5,7 @@ export type SentenceBuildItem = {
   bank: string[];
   answer: string[];
   spoken: string;
+  translationAr: string;
 };
 
 export type SentenceBuildActivity = {

@@ -8,7 +8,8 @@
       "sentenceType": "Affirmative",
       "bank": ["grandmother.", "Yesterday,", "my", "visit", "visited", "I"],
       "answer": ["Yesterday,", "I", "visited", "my", "grandmother."],
-      "spoken": "Yesterday, I visited my grandmother."
+      "spoken": "Yesterday, I visited my grandmother.",
+      "translationAr": "أمس، زرتُ جدتي."
     },
     {
       "id": "ps-watch",
@@ -16,7 +17,8 @@
       "sentenceType": "Affirmative",
       "bank": ["a", "watch", "watched", "night,", "movie.", "Last", "she"],
       "answer": ["Last", "night,", "she", "watched", "a", "movie."],
-      "spoken": "Last night, she watched a movie."
+      "spoken": "Last night, she watched a movie.",
+      "translationAr": "الليلة الماضية، شاهدت فيلماً."
     },
     {
       "id": "ps-play",
@@ -24,7 +26,8 @@
       "sentenceType": "Affirmative",
       "bank": ["football.", "play", "played", "ago,", "they", "Two", "days"],
       "answer": ["Two", "days", "ago,", "they", "played", "football."],
-      "spoken": "Two days ago, they played football."
+      "spoken": "Two days ago, they played football.",
+      "translationAr": "قبل يومين، لعبوا كرة القدم."
     }
   ]
 }

@@ -6,6 +6,8 @@ type FeedbackSheetProps = {
   state: Extract<InteractionState, "SUCCESS" | "TYPO" | "ERROR">;
   correctAnswer: string;
   onContinue: () => void;
+  onRetry?: () => void;
+  translation?: string;
   title?: string;
   subtitle?: string | null;
 };
@@ -35,6 +37,8 @@ export function FeedbackSheet({
   state,
   correctAnswer,
   onContinue,
+  onRetry,
+  translation,
   title,
   subtitle,
 }: FeedbackSheetProps) {
@@ -60,6 +64,12 @@ export function FeedbackSheet({
           </p>
         ) : null}
 
+        {state === "SUCCESS" && translation ? (
+          <p dir="rtl" className="mt-2 text-lg font-extrabold leading-8 text-white">
+            {translation}
+          </p>
+        ) : null}
+
         {/* Near miss: auto-reveal the correct spelling, then continue. */}
         {state === "TYPO" ? (
           <p dir="rtl" className="mt-2 text-base font-bold text-white/95">
@@ -72,14 +82,35 @@ export function FeedbackSheet({
 
         {/* Far wrong: message only — no auto-solve. */}
 
-        <button
-          type="button"
-          data-review="continue"
-          onClick={onContinue}
-          className={`mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl text-lg font-extrabold shadow-md transition-transform duration-200 active:scale-[0.98] ${copy.button}`}
-        >
-          المتابعة
-        </button>
+        {state === "ERROR" && onRetry ? (
+          <div className="mt-5 flex flex-col gap-2">
+            <button
+              type="button"
+              data-review="retry-item"
+              onClick={onRetry}
+              className="flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-white/80 text-lg font-extrabold text-white transition-transform duration-200 active:scale-[0.98]"
+            >
+              إعادة السؤال
+            </button>
+            <button
+              type="button"
+              data-review="continue"
+              onClick={onContinue}
+              className={`flex min-h-12 w-full items-center justify-center rounded-2xl text-lg font-extrabold shadow-md transition-transform duration-200 active:scale-[0.98] ${copy.button}`}
+            >
+              المتابعة
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            data-review="continue"
+            onClick={onContinue}
+            className={`mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl text-lg font-extrabold shadow-md transition-transform duration-200 active:scale-[0.98] ${copy.button}`}
+          >
+            المتابعة
+          </button>
+        )}
       </div>
     </div>
   );

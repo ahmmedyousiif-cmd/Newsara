@@ -140,16 +140,19 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
 
     if (!correct) {
       if (successTimer.current) window.clearTimeout(successTimer.current);
+      if (sentenceTimer.current) window.clearTimeout(sentenceTimer.current);
+      PremiumTTSManager.cancel();
       playWrongSound();
       vibrateAnswerShift();
       setShake(true);
       setFeedback("ERROR");
-      speakSentenceAfter(spoken, 480);
       window.setTimeout(() => setShake(false), 360);
       return;
     }
 
     if (successTimer.current) window.clearTimeout(successTimer.current);
+    if (sentenceTimer.current) window.clearTimeout(sentenceTimer.current);
+    PremiumTTSManager.cancel();
     const step = index;
     const last = step >= items.length - 1;
     successTimer.current = window.setTimeout(() => {
@@ -170,6 +173,18 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
       vibrateAnswerShift();
       setIndex((current) => current + 1);
     }
+  };
+
+  const retryQuestion = () => {
+    if (feedback !== "ERROR") return;
+    if (successTimer.current) window.clearTimeout(successTimer.current);
+    if (sentenceTimer.current) window.clearTimeout(sentenceTimer.current);
+    PremiumTTSManager.cancel();
+    lastCheckedRef.current = "";
+    setSelectedIds([]);
+    setShake(false);
+    setSpeaking(null);
+    setFeedback(null);
   };
 
   const addToken = (id: string) => {
@@ -219,6 +234,7 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
         scoreOutOfTen={scoreOutOfTen}
         percent={percent}
         date={date}
+        perfect={firstTryCorrect === total}
         onRetry={() => {
           setDone(false);
           setIndex(0);
@@ -336,6 +352,8 @@ export function PastSimpleExercise({ activity }: PastSimpleExerciseProps) {
           correctAnswer={item.spoken}
           title={feedback === "SUCCESS" ? praise.title : undefined}
           subtitle={feedback === "SUCCESS" ? praise.subtitle : undefined}
+          translation={feedback === "SUCCESS" ? item.translationAr : undefined}
+          onRetry={feedback === "ERROR" ? retryQuestion : undefined}
           onContinue={continueAfterFeedback}
         />
       ) : null}
